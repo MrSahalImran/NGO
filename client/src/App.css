@@ -1,0 +1,668 @@
+/* Ensure proper page layout */
+body {
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+\n\n.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+.main-content {
+  flex: 1;
+  margin-top: 80px; /* Push content below fixed navbar */
+  position: relative;
+  z-index: 1;
+  background-color: white;
+}
+
+/* Admin pages positioned below fixed navbar */
+.admin-page {
+  margin-top: 80px !important; /* Push below fixed navbar */
+  min-height: calc(100vh - 80px);
+  position: relative;
+  z-index: 1;
+  background-color: white;
+  width: 100%;
+}
+
+/* Fixed navbar positioning - moved above */
+
+/* Navbar brand styling */
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.navbar-dark.bg-dark {
+  z-index: 1030 !important;
+  background-color: var(--dark-color) !important;
+}
+
+/* Ensure all navbar elements use consistent colors */
+.navbar.fixed-top {
+  z-index: 1030 !important;
+  min-height: 80px;
+  transition: all 0.3s ease;
+  background-color: var(--dark-color) !important;
+}
+
+/* Consistent navbar text colors */
+.navbar-dark .navbar-brand,
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link:focus {
+  color: white !important;
+}
+
+/* Mobile navbar styles - seamless with main navbar */
+.navbar-collapse {
+  background-color: var(--dark-color) !important;
+  border-radius: 0;
+  margin-top: 0;
+  padding: 15px;
+  border: none;
+}
+
+.navbar-toggler {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+}
+
+.navbar-toggler:focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,0.75)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
+}
+
+/* Mobile nav links styling */
+@media (max-width: 991px) {
+  .navbar-collapse.show,
+  .navbar-collapse.collapsing {
+    background-color: var(--dark-color) !important;
+  }
+
+  .navbar-nav {
+    background-color: var(--dark-color);
+    border-radius: 0;
+    padding: 10px 0;
+    margin: 0;
+  }
+
+  .navbar-nav .nav-link {
+    color: white !important;
+    padding: 12px 20px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.3s ease;
+  }
+
+  .navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+  }
+
+  .navbar-nav .nav-link:last-child {
+    border-bottom: none;
+  }
+
+  /* Dropdown menu styling for mobile - same color as navbar */
+  .navbar-nav .dropdown-menu {
+    background-color: var(--dark-color) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 5px;
+  }
+
+  .navbar-nav .dropdown-item {
+    color: white;
+    padding: 10px 20px;
+  }
+
+  .navbar-nav .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+
+  .navbar-nav .dropdown-divider {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Donate button styling for mobile */
+  .navbar-nav .btn-secondary {
+    background-color: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+    margin: 5px 20px;
+    text-align: center;
+    border-radius: 25px;
+  }
+
+  /* Ensure proper spacing in mobile menu */
+  .navbar-collapse .navbar-nav:first-child {
+    margin-bottom: 10px;
+  }
+
+  .navbar-collapse .navbar-nav:last-child {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 15px;
+    margin-top: 10px;
+  }
+}
+
+/* Tablet specific adjustments */
+@media (min-width: 768px) and (max-width: 991px) {
+  .navbar-nav .nav-link {
+    padding: 8px 15px !important;
+  }
+}
+
+/* Ensure admin layout has no top spacing */
+.admin-page .container-fluid {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Remove any default Bootstrap spacing from admin components */
+.admin-page .row {
+  margin: 0 !important;
+}
+
+.admin-page .col-12:first-child {
+  padding: 0;
+}
+
+/* Ensure the admin page starts exactly below navbar */
+.admin-page {
+  display: block;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.admin-page > div {
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom colors for NGO theme */
+:root {
+  --primary-color: #2c5aa0;
+  --secondary-color: #f8a14d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --dark-color: #1a1d20;
+  --light-color: #f8f9fa;
+}
+
+/* Hero section styles */
+.hero-section {
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  color: white;
+  padding: 100px 0;
+  text-align: center;
+}
+
+.hero-section h1 {
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.hero-section .lead {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+/* Card styles */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Button styles */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: #1e3f73;
+  border-color: #1e3f73;
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-secondary:hover {
+  background-color: #e6922a;
+  border-color: #e6922a;
+}
+
+/* Stats section */
+.stats-section {
+  background-color: var(--light-color);
+  padding: 60px 0;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 20px;
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.stat-label {
+  font-size: 1.1rem;
+  color: var(--dark-color);
+  margin-top: 10px;
+}
+
+/* Form styles */
+.form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+/* Admin dashboard styles */
+.admin-sidebar {
+  background-color: var(--dark-color);
+  min-height: calc(100vh - 80px);
+  padding: 20px 0 0 0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.admin-sidebar .nav-link {
+  color: white;
+  padding: 15px 20px;
+  border-radius: 5px;
+  margin: 5px 10px;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.admin-content {
+  padding: 20px;
+  min-height: calc(100vh - 80px);
+  background-color: #f8f9fa;
+}
+
+.admin-content .mb-3:first-child {
+  margin-bottom: 1.5rem !important;
+}
+
+/* Mobile sidebar toggle */
+.admin-sidebar-toggle {
+  display: none;
+  background-color: var(--dark-color);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+.admin-sidebar-collapse {
+  display: none;
+}
+
+/* Responsive admin stats */
+.admin-stats-row {
+  margin-bottom: 2rem;
+}
+
+.admin-stats-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Table styles */
+.table-responsive {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+/* Responsive design */
+@media (max-width: 991px) {
+  .admin-sidebar {
+    position: fixed;
+    left: -100%;
+    top: 80px;
+    width: 280px;
+    height: calc(100vh - 80px);
+    z-index: 1000;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    padding-top: 20px;
+  }
+
+  .admin-sidebar.show {
+    left: 0;
+  }
+
+  .admin-sidebar-toggle {
+    display: block;
+  }
+
+  .admin-content {
+    padding: 15px;
+  }
+
+  .admin-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+  }
+
+  .admin-overlay.show {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section h1 {
+    font-size: 2.5rem;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .admin-content {
+    padding: 10px;
+  }
+
+  .admin-content h2 {
+    font-size: 1.5rem;
+  }
+
+  /* Mobile table improvements */
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.5rem 0.3rem;
+    vertical-align: middle;
+  }
+
+  /* Hide less important columns on mobile */
+  .table .d-none-mobile {
+    display: none;
+  }
+
+  /* Stack action buttons vertically on mobile */
+  .mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mobile-actions .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-content {
+    padding: 5px;
+  }
+
+  .admin-stats-card .card-body {
+    padding: 1rem 0.75rem;
+  }
+
+  .admin-stats-card h3 {
+    font-size: 1.5rem;
+  }
+
+  .admin-stats-card p {
+    font-size: 0.875rem;
+  }
+
+  /* Further mobile table optimizations */
+  .table-responsive {
+    font-size: 0.8rem;
+  }
+
+  .modal-dialog {
+    margin: 10px;
+  }
+
+  /* Compact filter forms on mobile */
+  .mobile-filters .form-label {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .mobile-filters .form-control,
+  .mobile-filters .form-select {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+  }
+}
+
+/* Custom animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Enhanced mobile table styles */
+.table .fw-medium {
+  font-weight: 600;
+}
+
+.mobile-actions .btn {
+  min-width: 32px;
+  height: 32px;
+}
+
+/* Sidebar animation improvements */
+@media (max-width: 991px) {
+  .admin-sidebar {
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .admin-content {
+    transition: margin-left 0.3s ease;
+  }
+}
+
+/* Badge improvements for mobile */
+@media (max-width: 576px) {
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.4rem;
+  }
+}
+
+/* Stat items responsive typography */
+.stat-item .stat-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.stat-item .stat-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .stat-item .stat-number {
+    font-size: 2rem;
+  }
+
+  .stat-item .stat-label {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .stat-item .stat-number {
+    font-size: 1.5rem;
+  }
+
+  .stat-item .stat-label {
+    font-size: 0.75rem;
+  }
+}
+
+/* Donation form styles */
+.donation-amount-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.donation-amount-btn {
+  padding: 15px;
+  border: 2px solid var(--primary-color);
+  background: white;
+  color: var(--primary-color);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.donation-amount-btn:hover,
+.donation-amount-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Payment form styles */
+.payment-form {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer styles */
+.footer {
+  background-color: var(--dark-color);
+  color: white;
+  padding: 40px 0 20px 0;
+  margin-top: auto;
+}
+
+/* Step indicator styles */
+.step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.step-indicator:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background-color: #dee2e6;
+  z-index: 0;
+}
+
+.step-indicator.active:not(:last-child)::after {
+  background-color: var(--primary-color);
+}
+
+.step-number {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #dee2e6;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.step-indicator.active .step-number {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.step-label {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.step-indicator.active .step-label {
+  color: var(--primary-color);
+}
