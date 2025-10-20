@@ -10,7 +10,6 @@ import {
   Spinner,
   Modal,
   Table,
-  Badge,
   Image,
 } from "react-bootstrap";
 import axios from "axios";
@@ -30,8 +29,6 @@ const AdminPhotos: React.FC = () => {
   const [previews, setPreviews] = useState<string[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("event");
-  const [tags, setTags] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Edit modal state
@@ -136,8 +133,8 @@ const AdminPhotos: React.FC = () => {
 
       formData.append("title", title);
       formData.append("description", description);
-      formData.append("category", category);
-      formData.append("tags", tags);
+      formData.append("category", "other");
+      formData.append("tags", "");
 
       const endpoint =
         selectedFiles.length === 1
@@ -170,8 +167,6 @@ const AdminPhotos: React.FC = () => {
     setPreviews([]);
     setTitle("");
     setDescription("");
-    setCategory("event");
-    setTags("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -192,8 +187,8 @@ const AdminPhotos: React.FC = () => {
         {
           title: editingPhoto.title,
           description: editingPhoto.description,
-          category: editingPhoto.category,
-          tags: editingPhoto.tags,
+          category: "other",
+          tags: [],
         },
         {
           headers: { "x-auth-token": token },
@@ -236,7 +231,7 @@ const AdminPhotos: React.FC = () => {
   };
 
   return (
-    <Container className="py-4">
+    <Container className="py-4 admin-photos-container">
       <h2 className="mb-4">
         <i className="bi bi-images me-2"></i>
         Manage Photos
@@ -300,32 +295,6 @@ const AdminPhotos: React.FC = () => {
                     placeholder="Enter description (optional)"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    disabled={uploading}
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Category *</Form.Label>
-                  <Form.Select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    disabled={uploading}
-                  >
-                    <option value="event">Event</option>
-                    <option value="program">Program</option>
-                    <option value="beneficiary">Beneficiary</option>
-                    <option value="facility">Facility</option>
-                    <option value="other">Other</option>
-                  </Form.Select>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Tags</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="charity, event, community (comma-separated)"
-                    value={tags}
-                    onChange={(e) => setTags(e.target.value)}
                     disabled={uploading}
                   />
                 </Form.Group>
@@ -418,8 +387,6 @@ const AdminPhotos: React.FC = () => {
                   <tr>
                     <th style={{ width: "100px" }}>Image</th>
                     <th>Title</th>
-                    <th>Category</th>
-                    <th>Tags</th>
                     <th>Date</th>
                     <th style={{ width: "150px" }}>Actions</th>
                   </tr>
@@ -446,18 +413,6 @@ const AdminPhotos: React.FC = () => {
                             {photo.description}
                           </div>
                         )}
-                      </td>
-                      <td>
-                        <Badge bg="info" className="text-capitalize">
-                          {photo.category}
-                        </Badge>
-                      </td>
-                      <td>
-                        {photo.tags.map((tag, index) => (
-                          <Badge key={index} bg="secondary" className="me-1">
-                            {tag}
-                          </Badge>
-                        ))}
                       </td>
                       <td>{new Date(photo.createdAt).toLocaleDateString()}</td>
                       <td>
@@ -519,39 +474,6 @@ const AdminPhotos: React.FC = () => {
                   }
                 />
               </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Category</Form.Label>
-                <Form.Select
-                  value={editingPhoto.category}
-                  onChange={(e) =>
-                    setEditingPhoto({
-                      ...editingPhoto,
-                      category: e.target.value as Photo["category"],
-                    })
-                  }
-                >
-                  <option value="event">Event</option>
-                  <option value="program">Program</option>
-                  <option value="beneficiary">Beneficiary</option>
-                  <option value="facility">Facility</option>
-                  <option value="other">Other</option>
-                </Form.Select>
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Tags (comma-separated)</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={editingPhoto.tags.join(", ")}
-                  onChange={(e) =>
-                    setEditingPhoto({
-                      ...editingPhoto,
-                      tags: e.target.value.split(",").map((t) => t.trim()),
-                    })
-                  }
-                />
-              </Form.Group>
             </Form>
           )}
         </Modal.Body>
@@ -564,6 +486,169 @@ const AdminPhotos: React.FC = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <style>
+        {`
+          /* Desktop/Laptop Improvements */
+          @media (min-width: 992px) {
+            .admin-photos-container {
+              max-width: 1200px !important;
+              margin-left: auto !important;
+              margin-right: auto !important;
+            }
+
+            /* Upload Card Enhancements */
+            .shadow-sm {
+              box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.08) !important;
+              transition: box-shadow 0.3s ease;
+            }
+
+            .shadow-sm:hover {
+              box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.12) !important;
+            }
+
+            /* Better spacing for preview grid */
+            .position-relative {
+              transition: transform 0.2s ease;
+            }
+
+            .position-relative:hover {
+              transform: scale(1.02);
+            }
+
+            /* Table Improvements */
+            .table {
+              font-size: 0.95rem;
+            }
+
+            .table thead th {
+              background-color: #f8f9fa;
+              font-weight: 600;
+              border-bottom: 2px solid #dee2e6;
+              position: sticky;
+              top: 0;
+              z-index: 10;
+            }
+
+            .table tbody tr {
+              transition: background-color 0.2s ease;
+            }
+
+            .table tbody tr:hover {
+              background-color: #f1f3f5 !important;
+            }
+
+            /* Image thumbnails */
+            .table img {
+              border-radius: 8px;
+              transition: transform 0.2s ease;
+              cursor: pointer;
+            }
+
+            .table img:hover {
+              transform: scale(1.5);
+              z-index: 1000;
+              box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+            }
+
+            /* Button spacing */
+            .table td button {
+              min-width: 36px;
+            }
+
+            /* Better form controls */
+            .form-control:focus,
+            .form-select:focus {
+              border-color: #80bdff;
+              box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            }
+
+            /* Upload button */
+            .btn-primary {
+              transition: all 0.2s ease;
+            }
+
+            .btn-primary:hover:not(:disabled) {
+              transform: translateY(-2px);
+              box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+            }
+
+            /* Preview area improvements */
+            .mb-3 .position-relative img {
+              border: 2px solid #dee2e6;
+            }
+
+            /* Card headers */
+            .card-header h5 {
+              font-size: 1.1rem;
+              letter-spacing: 0.5px;
+            }
+          }
+
+          /* Extra Large Desktop */
+          @media (min-width: 1400px) {
+            .admin-photos-container {
+              max-width: 1300px !important;
+            }
+
+            .table {
+              font-size: 1rem;
+            }
+
+            .table img {
+              width: 100px !important;
+              height: 100px !important;
+            }
+
+            h2 {
+              font-size: 2rem;
+            }
+          }
+
+          /* Tablet Improvements */
+          @media (min-width: 768px) and (max-width: 991px) {
+            .admin-photos-container {
+              max-width: 720px !important;
+              margin-left: auto !important;
+              margin-right: auto !important;
+            }
+
+            .table {
+              font-size: 0.9rem;
+            }
+
+            .table img {
+              width: 60px !important;
+              height: 60px !important;
+            }
+
+            .table td, .table th {
+              padding: 0.5rem;
+            }
+          }
+
+          /* Mobile Specific (keep existing good mobile styles) */
+          @media (max-width: 767px) {
+            .table {
+              font-size: 0.85rem;
+            }
+
+            .table img {
+              width: 50px !important;
+              height: 50px !important;
+            }
+
+            .table td, .table th {
+              padding: 0.4rem;
+            }
+
+            .btn-sm {
+              padding: 0.25rem 0.4rem;
+              font-size: 0.75rem;
+            }
+          }
+        `}
+      </style>
     </Container>
   );
 };
