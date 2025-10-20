@@ -33,6 +33,9 @@ const Navbar: React.FC = () => {
             <LinkContainer to="/programs">
               <Nav.Link>Programs</Nav.Link>
             </LinkContainer>
+            <LinkContainer to="/gallery">
+              <Nav.Link>Gallery</Nav.Link>
+            </LinkContainer>
             <LinkContainer to="/contact">
               <Nav.Link>Contact</Nav.Link>
             </LinkContainer>
@@ -54,6 +57,9 @@ const Navbar: React.FC = () => {
                   <>
                     <LinkContainer to="/admin/dashboard">
                       <NavDropdown.Item>Admin Dashboard</NavDropdown.Item>
+                    </LinkContainer>
+                    <LinkContainer to="/admin/photos">
+                      <NavDropdown.Item>Manage Photos</NavDropdown.Item>
                     </LinkContainer>
                     <NavDropdown.Divider />
                   </>
