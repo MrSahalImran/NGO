@@ -133,8 +133,6 @@ const AdminPhotos: React.FC = () => {
 
       formData.append("title", title);
       formData.append("description", description);
-      formData.append("category", "other");
-      formData.append("tags", "");
 
       const endpoint =
         selectedFiles.length === 1

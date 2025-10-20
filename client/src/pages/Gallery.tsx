@@ -101,9 +101,6 @@ const Gallery: React.FC = () => {
                     </div>
                     <div className="user-info">
                       <div className="username">Virdh Ashram</div>
-                      <div className="post-location text-capitalize">
-                        {photo.category}
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -120,15 +117,6 @@ const Gallery: React.FC = () => {
                   </div>
                   {photo.description && (
                     <p className="post-description">{photo.description}</p>
-                  )}
-                  {photo.tags.length > 0 && (
-                    <div className="post-tags">
-                      {photo.tags.map((tag, index) => (
-                        <span key={index} className="hashtag">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
                   )}
                   <div className="post-date">
                     {new Date(photo.createdAt).toLocaleDateString("en-US", {

@@ -30,21 +30,12 @@ router.post(
         return res.status(400).json({ message: "Please upload an image file" });
       }
 
-      const { title, description, category, tags } = req.body;
+      const { title, description } = req.body;
 
       if (!title) {
         // Delete the uploaded image from Cloudinary if validation fails
         await cloudinary.uploader.destroy(req.file.filename);
         return res.status(400).json({ message: "Title is required" });
-      }
-
-      // Parse tags if it's a string
-      let parsedTags = [];
-      if (tags) {
-        parsedTags =
-          typeof tags === "string"
-            ? tags.split(",").map((tag) => tag.trim())
-            : tags;
       }
 
       const photo = new Photo({
@@ -53,8 +44,6 @@ router.post(
         imageUrl: req.file.path, // Cloudinary URL
         cloudinaryId: req.file.filename, // Cloudinary public ID
         uploadedBy: req.user.id,
-        category: category || "other",
-        tags: parsedTags,
       });
 
       await photo.save();
@@ -97,16 +86,7 @@ router.post(
           .json({ message: "Please upload at least one image file" });
       }
 
-      const { title, description, category, tags } = req.body;
-
-      // Parse tags if it's a string
-      let parsedTags = [];
-      if (tags) {
-        parsedTags =
-          typeof tags === "string"
-            ? tags.split(",").map((tag) => tag.trim())
-            : tags;
-      }
+      const { title, description } = req.body;
 
       const photos = await Promise.all(
         req.files.map(async (file) => {
@@ -116,8 +96,6 @@ router.post(
             imageUrl: file.path,
             cloudinaryId: file.filename,
             uploadedBy: req.user.id,
-            category: category || "other",
-            tags: parsedTags,
           });
           await photo.save();
           return photo;
@@ -152,16 +130,9 @@ router.post(
 // @access  Public
 router.get("/", async (req, res) => {
   try {
-    const category = req.query.category;
-
-    // Build query - only active photos
-    const query = { isActive: true };
-    if (category && category !== "all") {
-      query.category = category;
-    }
-
-    const photos = await Photo.find(query)
-      .select("title description imageUrl category tags createdAt")
+    // Get only active photos
+    const photos = await Photo.find({ isActive: true })
+      .select("title description imageUrl createdAt")
       .sort({ createdAt: -1 });
 
     res.json(photos);
@@ -188,17 +159,10 @@ router.put("/:id", auth, isAdmin, async (req, res) => {
       return res.status(404).json({ message: "Photo not found" });
     }
 
-    const { title, description, category, tags, isActive } = req.body;
+    const { title, description, isActive } = req.body;
 
     if (title !== undefined) photo.title = title;
     if (description !== undefined) photo.description = description;
-    if (category !== undefined) photo.category = category;
-    if (tags !== undefined) {
-      photo.tags =
-        typeof tags === "string"
-          ? tags.split(",").map((tag) => tag.trim())
-          : tags;
-    }
     if (isActive !== undefined) photo.isActive = isActive;
 
     await photo.save();

@@ -26,17 +26,6 @@ const photoSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    category: {
-      type: String,
-      enum: ["event", "program", "beneficiary", "facility", "other"],
-      default: "other",
-    },
-    tags: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
     isActive: {
       type: Boolean,
       default: true,
@@ -49,7 +38,5 @@ const photoSchema = new mongoose.Schema(
 
 // Index for faster queries
 photoSchema.index({ uploadedBy: 1, createdAt: -1 });
-photoSchema.index({ category: 1, isActive: 1 });
-photoSchema.index({ tags: 1 });
 
 module.exports = mongoose.model("Photo", photoSchema);
