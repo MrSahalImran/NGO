@@ -42,3 +42,5 @@ coverage/
 # Admin seed file
 seedAdmin.js
 
+# Uploads folder (not needed with Cloudinary)
+uploads/

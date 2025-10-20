@@ -1,0 +1,296 @@
+{
+  "info": {
+    "name": "NGO Photo API - Admin Only Upload",
+    "description": "Test photo upload feature with Cloudinary (Admin only)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Admin Login (Get Token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"your_admin_password\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Upload Single Photo (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-auth-token",
+            "value": "{{admin_token}}",
+            "description": "Paste admin JWT token from login"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "photo",
+              "type": "file",
+              "description": "Select image file"
+            },
+            {
+              "key": "title",
+              "value": "Community Event 2025",
+              "type": "text"
+            },
+            {
+              "key": "description",
+              "value": "Annual charity event with 200+ volunteers",
+              "type": "text"
+            },
+            {
+              "key": "category",
+              "value": "event",
+              "type": "text",
+              "description": "event|program|beneficiary|facility|other"
+            },
+            {
+              "key": "tags",
+              "value": "charity,event,community",
+              "type": "text",
+              "description": "Comma-separated tags"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/photos/upload",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "photos", "upload"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Upload Multiple Photos (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-auth-token",
+            "value": "{{admin_token}}",
+            "description": "Paste admin JWT token"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "photos",
+              "type": "file",
+              "description": "Select multiple image files"
+            },
+            {
+              "key": "title",
+              "value": "Program Photos",
+              "type": "text"
+            },
+            {
+              "key": "description",
+              "value": "Photos from our education program",
+              "type": "text"
+            },
+            {
+              "key": "category",
+              "value": "program",
+              "type": "text"
+            },
+            {
+              "key": "tags",
+              "value": "education,children,program",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/photos/upload-multiple",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "photos", "upload-multiple"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Get All Photos (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/photos?page=1&limit=20",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "photos"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            },
+            {
+              "key": "category",
+              "value": "event",
+              "disabled": true,
+              "description": "Optional filter"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Get Single Photo (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/photos/:photoId",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "photos", ":photoId"],
+          "variable": [
+            {
+              "key": "photoId",
+              "value": "paste_photo_id_here"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6. Update Photo (Admin)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-auth-token",
+            "value": "{{admin_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated Title\",\n  \"description\": \"Updated description\",\n  \"category\": \"program\",\n  \"tags\": [\"updated\", \"tags\"],\n  \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/photos/:photoId",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "photos", ":photoId"],
+          "variable": [
+            {
+              "key": "photoId",
+              "value": "paste_photo_id_here"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. Like Photo (Any User)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-auth-token",
+            "value": "{{user_token}}",
+            "description": "Any authenticated user token"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/photos/:photoId/like",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "photos", ":photoId", "like"],
+          "variable": [
+            {
+              "key": "photoId",
+              "value": "paste_photo_id_here"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "8. Delete Photo (Admin)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-auth-token",
+            "value": "{{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/photos/:photoId",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "photos", ":photoId"],
+          "variable": [
+            {
+              "key": "photoId",
+              "value": "paste_photo_id_here"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "9. Get Photo Statistics (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-auth-token",
+            "value": "{{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/photos/stats/overview",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "photos", "stats", "overview"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
