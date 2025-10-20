@@ -20,6 +20,7 @@ const bankDetails = {
 };
 
 const Donation: React.FC = () => {
+  const [wantsCertificate, setWantsCertificate] = useState(false);
   const [formData, setFormData] = useState({
     donorName: "",
     email: "",
@@ -149,117 +150,153 @@ const Donation: React.FC = () => {
             <Col lg={6} className="mx-auto">
               <Card>
                 <Card.Body className="p-4">
-                  <h4 className="mb-3 text-center">Record Your Donation</h4>
-                  <p className="text-center text-muted mb-4">
-                    After transferring, please fill this form so we can
-                    acknowledge your contribution.
-                  </p>
+                  <h4 className="mb-4 text-center">Need a Receipt?</h4>
+
+                  {/* Certificate Request Toggle */}
+                  <div className="text-center mb-4 p-3 bg-white rounded border">
+                    <Form.Check
+                      type="checkbox"
+                      id="wantsCertificate"
+                      checked={wantsCertificate}
+                      onChange={(e) => setWantsCertificate(e.target.checked)}
+                      label={
+                        <span className="fw-bold">
+                          I want a Donation Receipt and 80G Certificate
+                        </span>
+                      }
+                    />
+                    <Form.Text className="text-muted d-block mt-2">
+                      Check this box if you need tax benefits under Section 80G
+                    </Form.Text>
+                  </div>
 
                   {submitted && (
                     <Alert variant="success">
                       <strong>Thank you!</strong> Your donation information has
-                      been recorded.
+                      been recorded. We will send your 80G certificate via
+                      email.
                     </Alert>
                   )}
 
-                  <Form onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Full Name *</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="donorName"
-                        value={formData.donorName}
-                        onChange={handleChange}
-                        required
-                        placeholder="Enter your name"
-                      />
-                    </Form.Group>
+                  {wantsCertificate && !submitted && (
+                    <>
+                      <p className="text-center text-muted mb-4">
+                        Please fill this form to receive your donation receipt
+                        and 80G certificate.
+                      </p>
 
-                    <Form.Group className="mb-3">
-                      <Form.Label>Email Address *</Form.Label>
-                      <Form.Control
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        placeholder="your.email@example.com"
-                      />
-                    </Form.Group>
+                      <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Full Name *</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="donorName"
+                            value={formData.donorName}
+                            onChange={handleChange}
+                            required
+                            placeholder="Enter your name"
+                          />
+                        </Form.Group>
 
-                    <Form.Group className="mb-3">
-                      <Form.Label>Phone Number</Form.Label>
-                      <Form.Control
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="+91-XXXXXXXXXX"
-                      />
-                    </Form.Group>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Email Address *</Form.Label>
+                          <Form.Control
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            placeholder="your.email@example.com"
+                          />
+                        </Form.Group>
 
-                    <Form.Group className="mb-3">
-                      <Form.Label>Amount Donated (₹) *</Form.Label>
-                      <Form.Control
-                        type="number"
-                        name="amount"
-                        value={formData.amount}
-                        onChange={handleChange}
-                        required
-                        min="1"
-                        placeholder="Enter amount"
-                      />
-                    </Form.Group>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Phone Number</Form.Label>
+                          <Form.Control
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            placeholder="+91-XXXXXXXXXX"
+                          />
+                        </Form.Group>
 
-                    <Form.Group className="mb-3">
-                      <Form.Label>Transaction ID / UTR Number *</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="transactionId"
-                        value={formData.transactionId}
-                        onChange={handleChange}
-                        required
-                        placeholder="12-digit UTR or Transaction ID"
-                      />
-                      <Form.Text className="text-muted">
-                        Required for verification and receipt generation
-                      </Form.Text>
-                    </Form.Group>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Amount Donated (₹) *</Form.Label>
+                          <Form.Control
+                            type="number"
+                            name="amount"
+                            value={formData.amount}
+                            onChange={handleChange}
+                            required
+                            min="1"
+                            placeholder="Enter amount"
+                          />
+                        </Form.Group>
 
-                    <Form.Group className="mb-3">
-                      <Form.Label>Payment Proof (Screenshot) *</Form.Label>
-                      <Form.Control
-                        type="file"
-                        accept="image/*,application/pdf"
-                        onChange={handleFileChange}
-                        required
-                      />
-                      <Form.Text className="text-muted">
-                        Upload screenshot or PDF of payment confirmation
-                      </Form.Text>
-                    </Form.Group>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Transaction ID / UTR Number *</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="transactionId"
+                            value={formData.transactionId}
+                            onChange={handleChange}
+                            required
+                            placeholder="12-digit UTR or Transaction ID"
+                          />
+                          <Form.Text className="text-muted">
+                            Required for verification and receipt generation
+                          </Form.Text>
+                        </Form.Group>
 
-                    <Form.Group className="mb-3">
-                      <Form.Label>Message (Optional)</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={3}
-                        name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        placeholder="Any message or dedication..."
-                      />
-                    </Form.Group>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Payment Proof (Screenshot) *</Form.Label>
+                          <Form.Control
+                            type="file"
+                            accept="image/*,application/pdf"
+                            onChange={handleFileChange}
+                            required
+                          />
+                          <Form.Text className="text-muted">
+                            Upload screenshot or PDF of payment confirmation
+                          </Form.Text>
+                        </Form.Group>
 
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      className="w-100"
-                      disabled={submitted}
-                    >
-                      {submitted ? "Submitted!" : "Submit Donation Info"}
-                    </Button>
-                  </Form>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Message (Optional)</Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            rows={3}
+                            name="message"
+                            value={formData.message}
+                            onChange={handleChange}
+                            placeholder="Any message or dedication..."
+                          />
+                        </Form.Group>
+
+                        <Button
+                          type="submit"
+                          variant="primary"
+                          className="w-100"
+                          disabled={submitted}
+                        >
+                          {submitted
+                            ? "Submitted!"
+                            : "Submit for 80G Certificate"}
+                        </Button>
+                      </Form>
+                    </>
+                  )}
+
+                  {!wantsCertificate && !submitted && (
+                    <div className="text-center p-4">
+                      <p className="text-muted">
+                        <i className="bi bi-info-circle me-2"></i>
+                        If you don't need a receipt, you can simply donate using
+                        the details above. Thank you for your generosity!
+                      </p>
+                    </div>
+                  )}
                 </Card.Body>
               </Card>
             </Col>
