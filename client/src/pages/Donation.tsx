@@ -8,104 +8,63 @@ import {
   Button,
   Alert,
 } from "react-bootstrap";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import PaymentForm from "../components/PaymentForm";
-import { toast } from "react-toastify";
 
-// Replace with your Stripe publishable key
-const stripePromise = loadStripe("pk_test_your_stripe_publishable_key");
+const bankDetails = {
+  accountName: "Virdh Ashram Foundation",
+  accountNumber: "1234567890",
+  ifsc: "SBIN0001234",
+  bankName: "State Bank of India",
+  branch: "Main Branch, City",
+  upiId: "virdhashram@upi",
+  qrCodeUrl: "/static/upi-qr.png", // Place your QR code image in public/static/upi-qr.png
+};
 
-const Donation = () => {
-  const [step, setStep] = useState(1);
-  const [donationData, setDonationData] = useState({
+const Donation: React.FC = () => {
+  const [formData, setFormData] = useState({
     donorName: "",
-    donorEmail: "",
-    donorPhone: "",
-    amount: 0,
-    donationType: "one-time",
-    purpose: "general",
+    email: "",
+    phone: "",
+    amount: "",
+    transactionId: "",
     message: "",
-    isAnonymous: false,
   });
-  const [clientSecret, setClientSecret] = useState("");
+  const [paymentProof, setPaymentProof] = useState<File | null>(null);
+  const [submitted, setSubmitted] = useState(false);
 
-  const predefinedAmounts = [25, 50, 100, 250, 500, 1000];
-  const purposes = [
-    { value: "education", label: "Education Programs" },
-    { value: "healthcare", label: "Healthcare Initiatives" },
-    { value: "environment", label: "Environmental Projects" },
-    { value: "poverty-relief", label: "Poverty Alleviation" },
-    { value: "general", label: "General Fund" },
-  ];
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setDonationData({
-      ...donationData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleAmountSelect = (amount: number) => {
-    setDonationData({
-      ...donationData,
-      amount: amount,
-    });
-  };
-
-  const handleCustomAmount = (e) => {
-    const amount = parseFloat(e.target.value) || 0;
-    setDonationData({
-      ...donationData,
-      amount: amount,
-    });
-  };
-
-  const handleNextStep = async () => {
-    if (step === 1) {
-      if (!donationData.amount || donationData.amount < 1) {
-        toast.error("Please select or enter a donation amount");
-        return;
-      }
-      setStep(2);
-    } else if (step === 2) {
-      if (!donationData.donorName || !donationData.donorEmail) {
-        toast.error("Please fill in all required fields");
-        return;
-      }
-
-      try {
-        // Create payment intent
-        const response = await fetch("/api/payments/create-payment-intent", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            amount: donationData.amount,
-            donorName: donationData.donorName,
-            donorEmail: donationData.donorEmail,
-          }),
-        });
-
-        const { clientSecret } = await response.json();
-        setClientSecret(clientSecret);
-        setStep(3);
-      } catch (error) {
-        toast.error("Failed to initialize payment. Please try again.");
-      }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setPaymentProof(e.target.files[0]);
     }
   };
 
-  const handleBackStep = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
-  };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // For now, just show success message
+    // You'll tell me what to do with this data next
+    console.log("Donation form submitted:", formData);
+    console.log("Payment proof file:", paymentProof);
+    setSubmitted(true);
 
-  const handlePaymentSuccess = () => {
-    setStep(4);
+    // Reset form after 3 seconds
+    setTimeout(() => {
+      setSubmitted(false);
+      setFormData({
+        donorName: "",
+        email: "",
+        phone: "",
+        amount: "",
+        transactionId: "",
+        message: "",
+      });
+      setPaymentProof(null);
+    }, 3000);
   };
 
   return (
@@ -118,34 +77,64 @@ const Donation = () => {
               <h1>Make a Donation</h1>
               <p className="lead">
                 Your contribution helps us continue our mission of creating
-                positive change in communities worldwide.
+                positive change in communities. Please use the details below to
+                donate via bank transfer or UPI.
               </p>
             </Col>
           </Row>
         </Container>
       </section>
 
-      {/* Progress Indicator */}
-      <section className="py-3 bg-light">
+      {/* Bank Details & UPI QR */}
+      <section className="py-5">
         <Container>
           <Row>
-            <Col lg={8} className="mx-auto">
-              <div className="d-flex justify-content-between align-items-center">
-                <div className={`step-indicator ${step >= 1 ? "active" : ""}`}>
-                  <div className="step-number">1</div>
-                  <div className="step-label">Amount</div>
-                </div>
-                <div className={`step-indicator ${step >= 2 ? "active" : ""}`}>
-                  <div className="step-number">2</div>
-                  <div className="step-label">Details</div>
-                </div>
-                <div className={`step-indicator ${step >= 3 ? "active" : ""}`}>
-                  <div className="step-number">3</div>
-                  <div className="step-label">Payment</div>
-                </div>
-                <div className={`step-indicator ${step >= 4 ? "active" : ""}`}>
-                  <div className="step-number">4</div>
-                  <div className="step-label">Complete</div>
+            <Col md={6} className="mb-4">
+              <Card className="h-100">
+                <Card.Body>
+                  <h4 className="mb-3">Bank Transfer Details</h4>
+                  <ul className="list-unstyled">
+                    <li>
+                      <strong>Account Name:</strong> {bankDetails.accountName}
+                    </li>
+                    <li>
+                      <strong>Account Number:</strong>{" "}
+                      {bankDetails.accountNumber}
+                    </li>
+                    <li>
+                      <strong>IFSC Code:</strong> {bankDetails.ifsc}
+                    </li>
+                    <li>
+                      <strong>Bank Name:</strong> {bankDetails.bankName}
+                    </li>
+                    <li>
+                      <strong>Branch:</strong> {bankDetails.branch}
+                    </li>
+                  </ul>
+                  <div className="mt-3">
+                    <strong>UPI ID:</strong> {bankDetails.upiId}
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col
+              md={6}
+              className="mb-4 d-flex align-items-center justify-content-center"
+            >
+              <div className="text-center w-100">
+                <h4 className="mb-3">Scan UPI QR Code</h4>
+                <img
+                  src={bankDetails.qrCodeUrl}
+                  alt="UPI QR Code"
+                  style={{
+                    maxWidth: 240,
+                    width: "100%",
+                    borderRadius: 8,
+                    border: "1px solid #eee",
+                  }}
+                />
+                <div className="mt-2 text-muted" style={{ fontSize: 13 }}>
+                  Scan with any UPI app (Paytm, GPay, PhonePe, etc.)
                 </div>
               </div>
             </Col>
@@ -153,241 +142,124 @@ const Donation = () => {
         </Container>
       </section>
 
-      {/* Donation Form */}
-      <section className="py-5">
+      {/* Donation Record Form */}
+      <section className="py-5 bg-light">
         <Container>
           <Row>
-            <Col lg={8} className="mx-auto">
-              <Card className="card-hover">
-                <Card.Body className="p-5">
-                  {/* Step 1: Amount Selection */}
-                  {step === 1 && (
-                    <div>
-                      <h3 className="text-primary mb-4">
-                        Select Donation Amount
-                      </h3>
+            <Col lg={6} className="mx-auto">
+              <Card>
+                <Card.Body className="p-4">
+                  <h4 className="mb-3 text-center">Record Your Donation</h4>
+                  <p className="text-center text-muted mb-4">
+                    After transferring, please fill this form so we can
+                    acknowledge your contribution.
+                  </p>
 
-                      <div className="donation-amount-buttons mb-4">
-                        {predefinedAmounts.map((amount) => (
-                          <button
-                            key={amount}
-                            type="button"
-                            className={`donation-amount-btn ${
-                              donationData.amount === amount ? "active" : ""
-                            }`}
-                            onClick={() => handleAmountSelect(amount)}
-                          >
-                            ${amount}
-                          </button>
-                        ))}
-                      </div>
-
-                      <Form.Group className="mb-4">
-                        <Form.Label>Or enter custom amount:</Form.Label>
-                        <Form.Control
-                          type="number"
-                          min="1"
-                          step="0.01"
-                          placeholder="Enter amount"
-                          onChange={handleCustomAmount}
-                        />
-                      </Form.Group>
-
-                      <Form.Group className="mb-4">
-                        <Form.Label>Donation Type</Form.Label>
-                        <Form.Select
-                          name="donationType"
-                          value={donationData.donationType}
-                          onChange={handleChange}
-                        >
-                          <option value="one-time">One-time donation</option>
-                          <option value="monthly">Monthly donation</option>
-                          <option value="yearly">Yearly donation</option>
-                        </Form.Select>
-                      </Form.Group>
-
-                      <Form.Group className="mb-4">
-                        <Form.Label>Purpose</Form.Label>
-                        <Form.Select
-                          name="purpose"
-                          value={donationData.purpose}
-                          onChange={handleChange}
-                        >
-                          {purposes.map((purpose) => (
-                            <option key={purpose.value} value={purpose.value}>
-                              {purpose.label}
-                            </option>
-                          ))}
-                        </Form.Select>
-                      </Form.Group>
-
-                      <div className="text-center">
-                        <Button
-                          variant="primary"
-                          size="lg"
-                          onClick={handleNextStep}
-                          disabled={
-                            !donationData.amount || donationData.amount < 1
-                          }
-                        >
-                          Continue - ${donationData.amount || 0}
-                        </Button>
-                      </div>
-                    </div>
+                  {submitted && (
+                    <Alert variant="success">
+                      <strong>Thank you!</strong> Your donation information has
+                      been recorded.
+                    </Alert>
                   )}
 
-                  {/* Step 2: Donor Information */}
-                  {step === 2 && (
-                    <div>
-                      <h3 className="text-primary mb-4">Donor Information</h3>
+                  <Form onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Full Name *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="donorName"
+                        value={formData.donorName}
+                        onChange={handleChange}
+                        required
+                        placeholder="Enter your name"
+                      />
+                    </Form.Group>
 
-                      <Row>
-                        <Col md={6}>
-                          <Form.Group className="mb-3">
-                            <Form.Label>Full Name *</Form.Label>
-                            <Form.Control
-                              type="text"
-                              name="donorName"
-                              value={donationData.donorName}
-                              onChange={handleChange}
-                              required
-                              placeholder="Enter your full name"
-                            />
-                          </Form.Group>
-                        </Col>
-                        <Col md={6}>
-                          <Form.Group className="mb-3">
-                            <Form.Label>Email Address *</Form.Label>
-                            <Form.Control
-                              type="email"
-                              name="donorEmail"
-                              value={donationData.donorEmail}
-                              onChange={handleChange}
-                              required
-                              placeholder="your.email@example.com"
-                            />
-                          </Form.Group>
-                        </Col>
-                      </Row>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Email Address *</Form.Label>
+                      <Form.Control
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        placeholder="your.email@example.com"
+                      />
+                    </Form.Group>
 
-                      <Form.Group className="mb-3">
-                        <Form.Label>Phone Number (Optional)</Form.Label>
-                        <Form.Control
-                          type="tel"
-                          name="donorPhone"
-                          value={donationData.donorPhone}
-                          onChange={handleChange}
-                          placeholder="+1-XXX-XXX-XXXX"
-                        />
-                      </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Phone Number</Form.Label>
+                      <Form.Control
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="+91-XXXXXXXXXX"
+                      />
+                    </Form.Group>
 
-                      <Form.Group className="mb-3">
-                        <Form.Label>Message (Optional)</Form.Label>
-                        <Form.Control
-                          as="textarea"
-                          rows={3}
-                          name="message"
-                          value={donationData.message}
-                          onChange={handleChange}
-                          placeholder="Share a message or dedication..."
-                        />
-                      </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Amount Donated (₹) *</Form.Label>
+                      <Form.Control
+                        type="number"
+                        name="amount"
+                        value={formData.amount}
+                        onChange={handleChange}
+                        required
+                        min="1"
+                        placeholder="Enter amount"
+                      />
+                    </Form.Group>
 
-                      <Form.Group className="mb-4">
-                        <Form.Check
-                          type="checkbox"
-                          name="isAnonymous"
-                          checked={donationData.isAnonymous}
-                          onChange={handleChange}
-                          label="Make this donation anonymous"
-                        />
-                      </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Transaction ID / UTR Number *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="transactionId"
+                        value={formData.transactionId}
+                        onChange={handleChange}
+                        required
+                        placeholder="12-digit UTR or Transaction ID"
+                      />
+                      <Form.Text className="text-muted">
+                        Required for verification and receipt generation
+                      </Form.Text>
+                    </Form.Group>
 
-                      <div className="d-flex justify-content-between">
-                        <Button
-                          variant="outline-secondary"
-                          onClick={handleBackStep}
-                        >
-                          Back
-                        </Button>
-                        <Button variant="primary" onClick={handleNextStep}>
-                          Continue to Payment
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                    <Form.Group className="mb-3">
+                      <Form.Label>Payment Proof (Screenshot) *</Form.Label>
+                      <Form.Control
+                        type="file"
+                        accept="image/*,application/pdf"
+                        onChange={handleFileChange}
+                        required
+                      />
+                      <Form.Text className="text-muted">
+                        Upload screenshot or PDF of payment confirmation
+                      </Form.Text>
+                    </Form.Group>
 
-                  {/* Step 3: Payment */}
-                  {step === 3 && clientSecret && (
-                    <div>
-                      <h3 className="text-primary mb-4">Payment Information</h3>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Message (Optional)</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        placeholder="Any message or dedication..."
+                      />
+                    </Form.Group>
 
-                      <div className="mb-4 p-3 bg-light rounded">
-                        <h5>Donation Summary</h5>
-                        <p className="mb-1">
-                          <strong>Amount:</strong> ${donationData.amount}
-                        </p>
-                        <p className="mb-1">
-                          <strong>Type:</strong> {donationData.donationType}
-                        </p>
-                        <p className="mb-0">
-                          <strong>Purpose:</strong>{" "}
-                          {
-                            purposes.find(
-                              (p) => p.value === donationData.purpose
-                            )?.label
-                          }
-                        </p>
-                      </div>
-
-                      <Elements
-                        stripe={stripePromise}
-                        options={{ clientSecret }}
-                      >
-                        <PaymentForm
-                          donationData={donationData}
-                          onSuccess={handlePaymentSuccess}
-                          onBack={handleBackStep}
-                        />
-                      </Elements>
-                    </div>
-                  )}
-
-                  {/* Step 4: Success */}
-                  {step === 4 && (
-                    <div className="text-center">
-                      <Alert variant="success" className="p-5">
-                        <h3>Thank You for Your Generous Donation!</h3>
-                        <p className="lead">
-                          Your donation of ${donationData.amount} has been
-                          processed successfully.
-                        </p>
-                        <p>
-                          You will receive a confirmation email shortly. Your
-                          support helps us continue our mission of creating
-                          positive change in communities.
-                        </p>
-                        <Button
-                          variant="primary"
-                          onClick={() => {
-                            setStep(1);
-                            setDonationData({
-                              donorName: "",
-                              donorEmail: "",
-                              donorPhone: "",
-                              amount: 0,
-                              donationType: "one-time",
-                              purpose: "general",
-                              message: "",
-                              isAnonymous: false,
-                            });
-                          }}
-                        >
-                          Make Another Donation
-                        </Button>
-                      </Alert>
-                    </div>
-                  )}
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      className="w-100"
+                      disabled={submitted}
+                    >
+                      {submitted ? "Submitted!" : "Submit Donation Info"}
+                    </Button>
+                  </Form>
                 </Card.Body>
               </Card>
             </Col>
@@ -404,23 +276,22 @@ const Donation = () => {
                 <h3>Your Impact</h3>
                 <p className="lead">See how your donation makes a difference</p>
               </div>
-
               <Row>
                 <Col md={3} className="text-center mb-4">
-                  <h4 className="text-primary">$25</h4>
-                  <p>Provides school supplies for one child for a month</p>
+                  <h4 className="text-primary">₹500</h4>
+                  <p>Provides meals for 10 residents for a day</p>
                 </Col>
                 <Col md={3} className="text-center mb-4">
-                  <h4 className="text-primary">$50</h4>
-                  <p>Funds a health checkup for a family in need</p>
+                  <h4 className="text-primary">₹2000</h4>
+                  <p>Funds a health checkup camp</p>
                 </Col>
                 <Col md={3} className="text-center mb-4">
-                  <h4 className="text-primary">$100</h4>
-                  <p>Plants 50 trees in environmental conservation areas</p>
+                  <h4 className="text-primary">₹5000</h4>
+                  <p>Supports monthly medicines for 5 elders</p>
                 </Col>
                 <Col md={3} className="text-center mb-4">
-                  <h4 className="text-primary">$250</h4>
-                  <p>Provides vocational training for one individual</p>
+                  <h4 className="text-primary">₹10000</h4>
+                  <p>Sponsors a cultural event for all residents</p>
                 </Col>
               </Row>
             </Col>
