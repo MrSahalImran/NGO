@@ -283,22 +283,31 @@ const Donations: React.FC = () => {
                       <Card.Body>
                         <div className="d-flex justify-content-between align-items-start mb-2">
                           <div>
-                            <div className="fw-semibold">{donation.donorName}</div>
-                            <div className="text-muted small">{formatDate(donation.createdAt)}</div>
+                            <div className="fw-semibold">
+                              {donation.donorName}
+                            </div>
+                            <div className="text-muted small">
+                              {formatDate(donation.createdAt)}
+                            </div>
                           </div>
                           <div>{getStatusBadge(donation.status)}</div>
                         </div>
                         <div className="d-flex justify-content-between align-items-center">
                           <div>
                             <div className="text-muted small">Amount</div>
-                            <div className="fw-bold">₹{donation.amount.toLocaleString()}</div>
+                            <div className="fw-bold">
+                              ₹{donation.amount.toLocaleString()}
+                            </div>
                           </div>
                           <div className="text-end">
                             <div className="text-muted small">Txn</div>
                             <div className="small">
                               <code>
                                 {donation.transactionId.length > 10
-                                  ? `${donation.transactionId.slice(0, 6)}…${donation.transactionId.slice(-4)}`
+                                  ? `${donation.transactionId.slice(
+                                      0,
+                                      6
+                                    )}…${donation.transactionId.slice(-4)}`
                                   : donation.transactionId}
                               </code>
                             </div>

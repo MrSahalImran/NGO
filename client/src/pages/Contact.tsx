@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import {
   FaPhone,
@@ -12,8 +12,22 @@ import {
 import { toast } from "react-toastify";
 import axios from "axios";
 
+interface NGOInfo {
+  contact: {
+    email: string;
+    phone: string;
+    address: string;
+  };
+  socialMedia: {
+    facebook?: string;
+    twitter?: string;
+    instagram?: string;
+    linkedin?: string;
+  };
+}
+
 const Contact = () => {
-  const [ngoInfo, setNgoInfo] = useState(null);
+  const [ngoInfo, setNgoInfo] = useState<NGOInfo | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -35,14 +49,14 @@ const Contact = () => {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
@@ -60,7 +74,7 @@ const Contact = () => {
         subject: "",
         message: "",
       });
-    } catch (error) {
+    } catch {
       toast.error("Failed to send message. Please try again.");
     } finally {
       setLoading(false);

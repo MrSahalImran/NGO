@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "react-bootstrap";
 import {
   useStripe,
@@ -8,12 +8,23 @@ import {
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const PaymentForm = ({ donationData, onSuccess, onBack }) => {
+interface DonationData {
+  amount: number;
+  [key: string]: unknown;
+}
+
+interface PaymentFormProps {
+  donationData: DonationData;
+  onSuccess: () => void;
+  onBack: () => void;
+}
+
+const PaymentForm = ({ donationData, onSuccess, onBack }: PaymentFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!stripe || !elements) {
@@ -40,7 +51,7 @@ const PaymentForm = ({ donationData, onSuccess, onBack }) => {
         toast.success("Payment successful! Thank you for your donation.");
         onSuccess();
       }
-    } catch (error) {
+    } catch {
       toast.error("Payment failed. Please try again.");
     } finally {
       setLoading(false);

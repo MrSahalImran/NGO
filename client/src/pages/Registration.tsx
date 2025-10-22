@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from 'react';
 import {
   Container,
   Row,
@@ -20,7 +20,7 @@ const Registration = () => {
     dateOfBirth: "",
     gender: "",
     occupation: "",
-    interests: [],
+    interests: [] as string[],
     emergencyContact: {
       name: "",
       phone: "",
@@ -43,7 +43,7 @@ const Registration = () => {
     "Fundraising",
   ];
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
     if (name.startsWith("emergencyContact.")) {
@@ -63,7 +63,7 @@ const Registration = () => {
     }
   };
 
-  const handleInterestChange = (interest) => {
+  const handleInterestChange = (interest: string) => {
     const updatedInterests = formData.interests.includes(interest)
       ? formData.interests.filter((i) => i !== interest)
       : [...formData.interests, interest];
@@ -74,7 +74,7 @@ const Registration = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
@@ -95,16 +95,17 @@ const Registration = () => {
         dateOfBirth: "",
         gender: "",
         occupation: "",
-        interests: [],
+        interests: [] as string[],
         emergencyContact: {
           name: "",
           phone: "",
           relationship: "",
         },
       });
-    } catch (error) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
       const message =
-        error.response?.data?.message ||
+        err.response?.data?.message ||
         "Registration failed. Please try again.";
       toast.error(message);
     } finally {

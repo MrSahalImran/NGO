@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 import axios from "axios";
 
+interface Program {
+  id: number;
+  image: string;
+  title: string;
+  description: string;
+}
+
 const Programs = () => {
-  const [programs, setPrograms] = useState([]);
+  const [programs, setPrograms] = useState<Program[]>([]);
 
   useEffect(() => {
     fetchPrograms();
@@ -39,7 +46,7 @@ const Programs = () => {
       <section className="py-5">
         <Container>
           <Row>
-            {programs.map((program, index) => (
+            {programs.map((program) => (
               <Col md={6} lg={6} key={program.id} className="mb-5">
                 <Card className="card-hover h-100">
                   <Row className="g-0">
