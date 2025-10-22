@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Container,
   Row,
@@ -43,7 +43,11 @@ const Registration = () => {
     "Fundraising",
   ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
 
     if (name.startsWith("emergencyContact.")) {
@@ -105,8 +109,7 @@ const Registration = () => {
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       const message =
-        err.response?.data?.message ||
-        "Registration failed. Please try again.";
+        err.response?.data?.message || "Registration failed. Please try again.";
       toast.error(message);
     } finally {
       setLoading(false);
