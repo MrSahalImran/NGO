@@ -1,10 +1,12 @@
 const { Resend } = require("resend");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const fromEmail = process.env.EMAIL_FROM || "onboarding@resend.dev";
 const fromName = process.env.EMAIL_FROM_NAME || "Virdh Ashram";
 
-// Validate required credentials
 if (!resendApiKey) {
   console.warn(
     "⚠️  RESEND_API_KEY not set - email functionality will be disabled"
@@ -14,7 +16,6 @@ if (!resendApiKey) {
 
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
-// Verify configuration on boot
 if (resend) {
   console.log(
     `✅ Resend email service configured (from: ${fromName} <${fromEmail}>)`
