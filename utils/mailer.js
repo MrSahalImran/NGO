@@ -9,24 +9,47 @@ const secure = process.env.SMTP_SECURE
 const authUser = process.env.EMAIL_USER;
 const authPass = process.env.EMAIL_PASS;
 
+// Validate required credentials
+if (!authUser || !authPass) {
+  console.warn(
+    "⚠️  EMAIL_USER or EMAIL_PASS not set - email functionality will be disabled"
+  );
+}
+
 const transporter = nodemailer.createTransport({
   host,
   port,
   secure,
   auth: authUser && authPass ? { user: authUser, pass: authPass } : undefined,
+  // Add timeout and connection settings for better reliability
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 5000,
+  socketTimeout: 10000,
+  // Enable debug logging in development
+  logger: process.env.NODE_ENV === "development",
+  debug: process.env.NODE_ENV === "development",
 });
 
 // Optional: verify transporter on boot and log but don't crash
-transporter
-  .verify()
-  .then(() => {
-    console.log(
-      `Email transporter ready (host=${host}, port=${port}, secure=${secure})`
-    );
-  })
-  .catch((err) => {
-    console.warn("Email transporter verification failed:", err?.message || err);
-  });
+if (authUser && authPass) {
+  transporter
+    .verify()
+    .then(() => {
+      console.log(
+        `✅ Email transporter ready (${authUser} via ${host}:${port})`
+      );
+    })
+    .catch((err) => {
+      console.warn(
+        `⚠️  Email transporter verification failed: ${err?.message || err}`
+      );
+      console.warn(
+        "   Email sending may fail. Check EMAIL_USER and EMAIL_PASS environment variables."
+      );
+    });
+} else {
+  console.warn("⚠️  Email transporter not configured - skipping verification");
+}
 
 /**
  * Send mail safely without throwing. Returns { ok: boolean, info?, error? }
