@@ -56,7 +56,6 @@ router.post("/submit", upload.single("paymentProof"), async (req, res) => {
     // Send email notification to admin
     const adminEmail = process.env.ADMIN_EMAIL || "admin@virdhashram.org";
     const mailOptions = {
-      from: process.env.EMAIL_USER,
       to: adminEmail,
       subject: `New Donation Received - ₹${amount}`,
       html: `
@@ -87,7 +86,6 @@ router.post("/submit", upload.single("paymentProof"), async (req, res) => {
 
     // Send confirmation email to donor
     const donorMailOptions = {
-      from: process.env.EMAIL_USER,
       to: email,
       subject: "Donation Received - Virdh Ashram",
       html: `
@@ -215,7 +213,6 @@ router.put("/:id/verify", auth, isAdmin, async (req, res) => {
 
     // Send 80G certificate email to donor
     const mailOptions = {
-      from: process.env.EMAIL_USER,
       to: donation.email,
       subject: "80G Tax Exemption Certificate - Virdh Ashram",
       html: `
@@ -290,7 +287,6 @@ router.put("/:id/reject", auth, isAdmin, async (req, res) => {
 
     // Send rejection email to donor
     const mailOptions = {
-      from: process.env.EMAIL_USER,
       to: donation.email,
       subject: "Donation Verification Update - Virdh Ashram",
       html: `
