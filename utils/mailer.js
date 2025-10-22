@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 
 const host = process.env.SMTP_HOST || "smtp.gmail.com";
-const port = Number(process.env.SMTP_PORT || 465);
+const port = Number(process.env.SMTP_PORT || 587); // Changed default to 587
 const secure = process.env.SMTP_SECURE
   ? /^(true|1|yes)$/i.test(process.env.SMTP_SECURE)
   : port === 465; // true for 465, false for 587
@@ -25,6 +25,8 @@ const transporter = nodemailer.createTransport({
   connectionTimeout: 10000, // 10 seconds
   greetingTimeout: 5000,
   socketTimeout: 10000,
+  // Force TLS for port 587
+  requireTLS: port === 587,
   // Enable debug logging in development
   logger: process.env.NODE_ENV === "development",
   debug: process.env.NODE_ENV === "development",
