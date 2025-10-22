@@ -20,6 +20,7 @@ import AdminDashboard from "./pages/Admin/Dashboard";
 import AdminRegistrations from "./pages/Admin/Registrations";
 import AdminPayments from "./pages/Admin/Payments";
 import AdminPhotos from "./pages/Admin/Photos";
+import AdminDonations from "./pages/Admin/Donations";
 import Gallery from "./pages/Gallery";
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -143,6 +144,16 @@ const App: React.FC = () => {
                 <main className="admin-page">
                   <PrivateRoute adminOnly={true}>
                     <AdminPhotos />
+                  </PrivateRoute>
+                </main>
+              }
+            />
+            <Route
+              path="/admin/donations"
+              element={
+                <main className="admin-page">
+                  <PrivateRoute adminOnly={true}>
+                    <AdminDonations />
                   </PrivateRoute>
                 </main>
               }

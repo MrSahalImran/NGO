@@ -7,11 +7,18 @@ import {
   FaChartBar,
   FaBars,
   FaTimes,
+  FaHandHoldingHeart,
+  FaImages,
 } from "react-icons/fa";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activePage: "dashboard" | "registrations" | "payments";
+  activePage:
+    | "dashboard"
+    | "registrations"
+    | "payments"
+    | "donations"
+    | "photos";
   title: string;
 }
 
@@ -47,7 +54,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
       key: "payments",
       to: "/admin/payments",
       icon: FaDollarSign,
-      label: "Donations",
+      label: "Old Donations",
+    },
+    {
+      key: "donations",
+      to: "/admin/donations",
+      icon: FaHandHoldingHeart,
+      label: "80G Donations",
+    },
+    {
+      key: "photos",
+      to: "/admin/photos",
+      icon: FaImages,
+      label: "Photos",
     },
   ];
 

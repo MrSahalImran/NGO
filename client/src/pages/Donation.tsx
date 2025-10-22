@@ -31,6 +31,8 @@ const Donation: React.FC = () => {
   });
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -45,27 +47,61 @@ const Donation: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, just show success message
-    // You'll tell me what to do with this data next
-    console.log("Donation form submitted:", formData);
-    console.log("Payment proof file:", paymentProof);
-    setSubmitted(true);
+    setLoading(true);
+    setError("");
 
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({
-        donorName: "",
-        email: "",
-        phone: "",
-        amount: "",
-        transactionId: "",
-        message: "",
+    try {
+      // Create FormData for multipart upload
+      const formDataToSend = new FormData();
+      formDataToSend.append("donorName", formData.donorName);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("amount", formData.amount);
+      formDataToSend.append("transactionId", formData.transactionId);
+      formDataToSend.append("message", formData.message);
+
+      if (paymentProof) {
+        formDataToSend.append("paymentProof", paymentProof);
+      }
+
+      // Get API URL from environment variable
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+      const response = await fetch(`${apiUrl}/api/donations/submit`, {
+        method: "POST",
+        body: formDataToSend,
       });
-      setPaymentProof(null);
-    }, 3000);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to submit donation");
+      }
+
+      setSubmitted(true);
+
+      // Reset form after 5 seconds
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({
+          donorName: "",
+          email: "",
+          phone: "",
+          amount: "",
+          transactionId: "",
+          message: "",
+        });
+        setPaymentProof(null);
+        setWantsCertificate(false);
+      }, 5000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+      console.error("Donation submission error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -170,11 +206,21 @@ const Donation: React.FC = () => {
                     </Form.Text>
                   </div>
 
+                  {error && (
+                    <Alert
+                      variant="danger"
+                      dismissible
+                      onClose={() => setError("")}
+                    >
+                      <strong>Error:</strong> {error}
+                    </Alert>
+                  )}
+
                   {submitted && (
                     <Alert variant="success">
                       <strong>Thank you!</strong> Your donation information has
-                      been recorded. We will send your 80G certificate via
-                      email.
+                      been recorded. We will send your 80G certificate via email
+                      within 2-3 business days after verification.
                     </Alert>
                   )}
 
@@ -278,9 +324,11 @@ const Donation: React.FC = () => {
                           type="submit"
                           variant="primary"
                           className="w-100"
-                          disabled={submitted}
+                          disabled={submitted || loading}
                         >
-                          {submitted
+                          {loading
+                            ? "Submitting..."
+                            : submitted
                             ? "Submitted!"
                             : "Submit for 80G Certificate"}
                         </Button>

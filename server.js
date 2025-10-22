@@ -32,13 +32,43 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("MongoDB connection error:", err));
 
-// Routes
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/registrations", require("./routes/registrations"));
-app.use("/api/payments", require("./routes/payments"));
-app.use("/api/admin", require("./routes/admin"));
-app.use("/api/ngo", require("./routes/ngo"));
-app.use("/api/photos", require("./routes/photos"));
+// Routes - with error handling and logging
+const routes = [
+  { path: "/api/auth", file: "./routes/auth" },
+  { path: "/api/registrations", file: "./routes/registrations" },
+  { path: "/api/payments", file: "./routes/payments" },
+  { path: "/api/admin", file: "./routes/admin" },
+  { path: "/api/ngo", file: "./routes/ngo" },
+  { path: "/api/photos", file: "./routes/photos" },
+  { path: "/api/donations", file: "./routes/donations" },
+];
+
+routes.forEach(({ path, file }) => {
+  try {
+    app.use(path, require(file));
+    console.log(`✓ Route registered: ${path}`);
+  } catch (error) {
+    console.error(`✗ Failed to load route ${path}:`, error.message);
+  }
+});
+
+// Health check endpoint for debugging
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || "development",
+    routes: routes.map((r) => r.path),
+    cloudinary: {
+      configured: !!(
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+      ),
+    },
+    mongodb: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+  });
+});
 
 // Serve static assets in production
 if (process.env.NODE_ENV === "production") {
@@ -53,4 +83,7 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log("Registered routes:");
+  routes.forEach(({ path }) => console.log(`  ${path}`));
 });
