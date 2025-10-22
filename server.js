@@ -66,7 +66,8 @@ app.get("/api/health", (req, res) => {
         process.env.CLOUDINARY_API_SECRET
       ),
     },
-    mongodb: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    mongodb:
+      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
   });
 });
 
