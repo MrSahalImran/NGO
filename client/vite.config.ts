@@ -8,7 +8,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/api": {
-        target: "https://ngo-2962.onrender.com",
+        target: "https//ngo-2962.onrender.com",
         changeOrigin: true,
         secure: false,
       },
