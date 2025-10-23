@@ -56,7 +56,6 @@ router.post("/submit", upload.single("paymentProof"), async (req, res) => {
     // Send email notification to admin
     const adminEmail = process.env.ADMIN_EMAIL || "admin@virdhashram.org";
     const mailOptions = {
-      from: process.env.EMAIL_USER,
       to: adminEmail,
       subject: `New Donation Received - ₹${amount}`,
       html: `
@@ -87,18 +86,16 @@ router.post("/submit", upload.single("paymentProof"), async (req, res) => {
 
     // Send confirmation email to donor
     const donorMailOptions = {
-      from: process.env.EMAIL_USER,
       to: email,
-      subject: "Donation Received - Virdh Ashram",
+      subject: "80G Certificate Request Received - Vridh Ashram",
       html: `
         <h2>Thank You for Your Donation!</h2>
         <p>Dear ${donorName},</p>
-        <p>We have received your donation of <strong>₹${amount}</strong>.</p>
-        <p><strong>Transaction ID:</strong> ${transactionId}</p>
-        <p>Your donation details are being verified by our team. Once verified, you will receive your 80G certificate via email within 2-3 business days.</p>
+        <p>We have received your request for 80G certificate.</p>
+        <p>Your donation will be confirmed by our team. Your 80G certificate will be generated and emailed to you after confirmation.</p>
         <br>
-        <p>Thank you for supporting Virdh Ashram!</p>
-        <p>Best regards,<br>Virdh Ashram Team</p>
+        <p>Thank you for supporting Vridh Ashram!</p>
+        <p>Best regards,<br>Vridh Ashram Team</p>
       `,
     };
 
@@ -215,13 +212,12 @@ router.put("/:id/verify", auth, isAdmin, async (req, res) => {
 
     // Send 80G certificate email to donor
     const mailOptions = {
-      from: process.env.EMAIL_USER,
       to: donation.email,
-      subject: "80G Tax Exemption Certificate - Virdh Ashram",
+      subject: "80G Tax Exemption Certificate - Vridh Ashram",
       html: `
         <h2>80G Tax Exemption Certificate</h2>
         <p>Dear ${donation.donorName},</p>
-        <p>Thank you for your generous donation to Virdh Ashram.</p>
+        <p>Thank you for your generous donation to Vridh Ashram.</p>
         <br>
         <p><strong>Receipt Number:</strong> ${donation.receiptNumber}</p>
         <p><strong>Donation Amount:</strong> ₹${donation.amount}</p>
@@ -234,7 +230,7 @@ router.put("/:id/verify", auth, isAdmin, async (req, res) => {
         <p>Your certificate will be attached to this email (PDF generation coming soon).</p>
         <br>
         <p>Thank you for supporting our cause!</p>
-        <p>Best regards,<br>Virdh Ashram Team</p>
+        <p>Best regards,<br>Vridh Ashram Team</p>
       `,
     };
 
@@ -290,9 +286,8 @@ router.put("/:id/reject", auth, isAdmin, async (req, res) => {
 
     // Send rejection email to donor
     const mailOptions = {
-      from: process.env.EMAIL_USER,
       to: donation.email,
-      subject: "Donation Verification Update - Virdh Ashram",
+      subject: "Donation Verification Update - Vridh Ashram",
       html: `
         <h2>Donation Verification Update</h2>
         <p>Dear ${donation.donorName},</p>
@@ -302,7 +297,7 @@ router.put("/:id/reject", auth, isAdmin, async (req, res) => {
         <p>If you believe this is an error, please contact us with your transaction details.</p>
         <p>Transaction ID: ${donation.transactionId}</p>
         <br>
-        <p>Best regards,<br>Virdh Ashram Team</p>
+        <p>Best regards,<br>Vridh Ashram Team</p>
       `,
     };
 
