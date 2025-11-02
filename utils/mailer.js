@@ -9,7 +9,7 @@ const secure = process.env.SMTP_SECURE
 const authUser = process.env.EMAIL_USER;
 const authPass = process.env.EMAIL_PASS;
 
-// Validate required credentials
+// Validate required credential
 if (!authUser || !authPass) {
   console.warn(
     "⚠️  EMAIL_USER or EMAIL_PASS not set - email functionality will be disabled"
