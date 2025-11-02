@@ -19,7 +19,16 @@ const Navbar: React.FC = () => {
     <BSNavbar bg="dark" variant="dark" expand="lg" fixed="top">
       <Container>
         <LinkContainer to="/">
-          <BSNavbar.Brand>
+          <BSNavbar.Brand className="d-flex align-items-center">
+            {/* logo - using the raster logo provided in public/ */}
+            <img
+              src="/images/logo.png"
+              alt="Virdh Ashram"
+              width={36}
+              height={36}
+              className="me-2"
+              style={{ objectFit: "contain" }}
+            />
             <strong>Virdh Ashram</strong>
           </BSNavbar.Brand>
         </LinkContainer>

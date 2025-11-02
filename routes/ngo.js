@@ -6,12 +6,12 @@ router.get("/info", (req, res) => {
   const ngoInfo = {
     name: "Vridh Ashram",
     mission:
-      "Empowering communities through education, healthcare, and sustainable development initiatives.",
+      "Our mission goes beyond providing basic necessities—it is about restoring self-worth, spreading kindness, and upholding the belief that every elder deserves to live with respect and compassion. Guided by the spirit of humanity, we strive to serve each resident with unconditional love, ensuring that they feel valued, cherished, and never alone.",
     vision:
       "A world where every individual has access to basic necessities and opportunities for growth.",
     founded: "2010",
     description:
-      "Vridh Ashram is a non-profit organization dedicated to creating positive change in underserved communities. We focus on education, healthcare, environmental conservation, and poverty alleviation programs.",
+      "Vridh Ashram is a non-profit organization dedicated to creating positive change in underserved communities.",
     programs: [
       {
         id: 1,
