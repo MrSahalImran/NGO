@@ -1,85 +1,74 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
+const dotenv = require("dotenv");
 
-const host = process.env.SMTP_HOST || "smtp.gmail.com";
-const port = Number(process.env.SMTP_PORT || 587);
-const secure = process.env.SMTP_SECURE
-  ? /^(true|1|yes)$/i.test(process.env.SMTP_SECURE)
-  : port === 465;
+dotenv.config();
 
-const authUser = process.env.EMAIL_USER;
-const authPass = process.env.EMAIL_PASS;
+const resendApiKey = process.env.RESEND_API_KEY;
+const fromEmail = process.env.EMAIL_FROM || "onboarding@resend.dev";
+const fromName = process.env.EMAIL_FROM_NAME || "Virdh Ashram";
 
-// Validate required credentials
-if (!authUser || !authPass) {
+if (!resendApiKey) {
   console.warn(
-    "⚠️  EMAIL_USER or EMAIL_PASS not set - email functionality will be disabled"
+    "⚠️  RESEND_API_KEY not set - email functionality will be disabled"
   );
-  console.warn(
-    "   For Gmail: Generate an App Password at https://myaccount.google.com/apppasswords"
-  );
+  console.warn("   Get your API key from https://resend.com/api-keys");
 }
 
-const transporter =
-  authUser && authPass
-    ? nodemailer.createTransport({
-        host,
-        port,
-        secure,
-        auth: { user: authUser, pass: authPass },
-        connectionTimeout: 10000,
-        greetingTimeout: 5000,
-        socketTimeout: 10000,
-        requireTLS: port === 587,
-      })
-    : null;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
-// Optional: verify transporter on boot and log but don't crash
-if (transporter) {
-  transporter
-    .verify()
-    .then(() => {
-      console.log(
-        `✅ Email transporter ready (${authUser} via ${host}:${port})`
-      );
-    })
-    .catch((err) => {
-      console.warn(
-        `⚠️  Email transporter verification failed: ${err?.message || err}`
-      );
-      console.warn(
-        "   Check EMAIL_USER and EMAIL_PASS. For Gmail, use an App Password."
-      );
-    });
+if (resend) {
+  console.log(
+    `✅ Resend email service configured (from: ${fromName} <${fromEmail}>)`
+  );
 } else {
-  console.warn("⚠️  Email transporter not configured - skipping email service");
+  console.warn("⚠️  Resend not configured - skipping email service");
 }
 
 /**
  * Send mail safely without throwing. Returns { ok: boolean, info?, error? }
+ *
+ * @param {Object} options - Email options
+ * @param {string} options.to - Recipient email address
+ * @param {string} options.subject - Email subject
+ * @param {string} options.html - HTML content
+ * @param {string} [options.text] - Plain text content (optional)
+ * @param {string} [options.from] - From address (optional, uses default)
  */
 async function sendMailSafe(options) {
   try {
-    if (!transporter) {
-      console.warn("Email transporter not configured - email not sent");
-      return {
-        ok: false,
-        error: new Error("Email transporter not configured"),
-      };
+    if (!resend) {
+      console.warn("Resend not configured - email not sent");
+      return { ok: false, error: new Error("Resend not configured") };
     }
 
-    const fromName = process.env.EMAIL_FROM_NAME || "Virdh Ashram";
-    const fromAddress = process.env.EMAIL_FROM || authUser;
-    const from =
-      options.from ||
-      (fromAddress ? `${fromName} <${fromAddress}>` : undefined);
+    const from = options.from || `${fromName} <${fromEmail}>`;
 
-    const info = await transporter.sendMail({ ...options, from });
-    console.log(`✅ Email sent successfully (${info.messageId})`);
-    return { ok: true, info };
+    // Resend API format
+    const { data, error } = await resend.emails.send({
+      from,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+      return { ok: false, error };
+    }
+
+    console.log(`✅ Email sent successfully (ID: ${data.id})`);
+    return { ok: true, info: data };
   } catch (error) {
     console.error("sendMailSafe error:", error?.message || error);
     return { ok: false, error };
   }
 }
 
-module.exports = { transporter, sendMailSafe };
+// Export both for backwards compatibility
+module.exports = {
+  sendMailSafe,
+  resend,
+  // Legacy exports (deprecated but kept for compatibility)
+  transporter: { sendMail: sendMailSafe },
+};
