@@ -1,10 +1,10 @@
 const nodemailer = require("nodemailer");
 
 const host = process.env.SMTP_HOST || "smtp.gmail.com";
-const port = Number(process.env.SMTP_PORT || 587); // 587 works better on cloud platforms
+const port = Number(process.env.SMTP_PORT || 587);
 const secure = process.env.SMTP_SECURE
   ? /^(true|1|yes)$/i.test(process.env.SMTP_SECURE)
-  : port === 465; // true for 465, false for 587
+  : port === 465;
 
 const authUser = process.env.EMAIL_USER;
 const authPass = process.env.EMAIL_PASS;
@@ -14,21 +14,24 @@ if (!authUser || !authPass) {
   console.warn(
     "⚠️  EMAIL_USER or EMAIL_PASS not set - email functionality will be disabled"
   );
-  console.warn("   For Gmail: Generate an App Password at https://myaccount.google.com/apppasswords");
+  console.warn(
+    "   For Gmail: Generate an App Password at https://myaccount.google.com/apppasswords"
+  );
 }
 
-const transporter = authUser && authPass
-  ? nodemailer.createTransport({
-      host,
-      port,
-      secure,
-      auth: { user: authUser, pass: authPass },
-      connectionTimeout: 10000,
-      greetingTimeout: 5000,
-      socketTimeout: 10000,
-      requireTLS: port === 587,
-    })
-  : null;
+const transporter =
+  authUser && authPass
+    ? nodemailer.createTransport({
+        host,
+        port,
+        secure,
+        auth: { user: authUser, pass: authPass },
+        connectionTimeout: 10000,
+        greetingTimeout: 5000,
+        socketTimeout: 10000,
+        requireTLS: port === 587,
+      })
+    : null;
 
 // Optional: verify transporter on boot and log but don't crash
 if (transporter) {
@@ -58,7 +61,10 @@ async function sendMailSafe(options) {
   try {
     if (!transporter) {
       console.warn("Email transporter not configured - email not sent");
-      return { ok: false, error: new Error("Email transporter not configured") };
+      return {
+        ok: false,
+        error: new Error("Email transporter not configured"),
+      };
     }
 
     const fromName = process.env.EMAIL_FROM_NAME || "Virdh Ashram";

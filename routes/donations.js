@@ -194,16 +194,18 @@ router.put("/:id/verify", auth, isAdmin, async (req, res) => {
     donation.verifiedBy = req.user.id;
     donation.verifiedAt = new Date();
 
-    // Generate receipt number
-    const year = new Date().getFullYear();
-    const count = await Donation.countDocuments({
-      status: "verified",
-      createdAt: { $gte: new Date(year, 0, 1) },
-    });
-    donation.receiptNumber = `80G/${year}/${String(count + 1).padStart(
-      4,
-      "0"
-    )}`;
+    // Generate receipt number only if it doesn't exist
+    if (!donation.receiptNumber) {
+      const year = new Date().getFullYear();
+      const count = await Donation.countDocuments({
+        receiptNumber: { $exists: true, $ne: null },
+        createdAt: { $gte: new Date(year, 0, 1) },
+      });
+      donation.receiptNumber = `80G/${year}/${String(count + 1).padStart(
+        4,
+        "0"
+      )}`;
+    }
 
     await donation.save();
 
