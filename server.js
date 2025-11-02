@@ -4,6 +4,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 const helmet = require("helmet");
+const { resend } = require("./utils/mailer");
 
 // Load environment variables
 dotenv.config();

@@ -9,8 +9,7 @@
     "client": "cd client && npm start",
     "server": "nodemon server.js",
     "seed": "node seedAdmin.js",
-    "build": "cd client && npm run build",
-    "heroku-postbuild": "cd client && npm install && npm run build"
+    "build": "cd client && npm run build"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
