@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import type { NGOInfo, Testimonial, NewsArticle } from "../types";
 import ControlledTestimonialsCarousel from "../components/ControlledTestimonialsCarousel";
+import PhotoGallery from "../components/PhotoGallery";
 
 const Home: React.FC = () => {
   const NGO_INFO: NGOInfo = {
@@ -196,29 +197,58 @@ const Home: React.FC = () => {
             </Col>
           </Row>
           <Row>
-            {ngoInfo.programs.slice(0, 4).map((program) => (
-              <Col md={6} lg={3} key={program.id} className="mb-4">
-                <Card className="card-hover h-100">
-                  <Card.Img
-                    variant="top"
-                    src={program.image}
-                    alt={program.title}
-                    style={{ height: "200px", objectFit: "cover" }}
-                  />
-                  <Card.Body className="d-flex flex-column">
-                    <Card.Title>{program.title}</Card.Title>
-                    <Card.Text className="flex-grow-1">
-                      {program.description}
+            {/* Photo gallery for building, rooms, and common areas */}
+            <Col>
+              <PhotoGallery
+                images={[
+                  {
+                    src: "/images/building1.jpg",
+                    caption: "Exterior - Main Building",
+                  },
+                  {
+                    src: "/images/reception.jpg",
+                    caption: "Reception & Welcome Area",
+                  },
+                  {
+                    src: "/images/room1.jpg",
+                    caption: "Resident Room (Sample)",
+                  },
+                  { src: "/images/dining.jpg", caption: "Dining Hall" },
+                  { src: "/images/garden.jpg", caption: "Garden & Courtyard" },
+                  { src: "/images/activity.jpg", caption: "Activity Room" },
+                ]}
+              />
+
+              <Card className="mt-4">
+                <Card.Body className="d-flex flex-column flex-md-row align-items-center justify-content-between">
+                  <div>
+                    <Card.Title>Visit Vridh Ashram</Card.Title>
+                    <Card.Text className="mb-0">
+                      Visiting hours: Mon–Sat 10:00–17:00
                     </Card.Text>
-                    <LinkContainer to="/programs">
-                      <Button variant="primary" size="sm">
-                        Learn More
+                    <Card.Text className="mb-0">
+                      Address: {ngoInfo.contact.address}
+                    </Card.Text>
+                    <Card.Text className="mb-0">
+                      Phone:{" "}
+                      <a href={`tel:${ngoInfo.contact.phone}`}>
+                        {ngoInfo.contact.phone}
+                      </a>
+                    </Card.Text>
+                  </div>
+                  <div className="mt-3 mt-md-0">
+                    <LinkContainer to="/registration">
+                      <Button variant="secondary" className="me-2">
+                        Volunteer
                       </Button>
                     </LinkContainer>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
+                    <a href={`mailto:${ngoInfo.contact.email}`}>
+                      <Button variant="primary">Contact Us</Button>
+                    </a>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
           </Row>
         </Container>
       </section>
