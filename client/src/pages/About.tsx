@@ -1,27 +1,38 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
-import axios from "axios";
 import type { NGOInfo } from "../types";
 
 const About: React.FC = () => {
-  const [ngoInfo, setNgoInfo] = useState<NGOInfo | null>(null);
-
-  useEffect(() => {
-    fetchNgoInfo();
-  }, []);
-
-  const fetchNgoInfo = async (): Promise<void> => {
-    try {
-      const res = await axios.get<NGOInfo>("/api/ngo/info");
-      setNgoInfo(res.data);
-    } catch (error: any) {
-      console.error("Error fetching NGO info:", error);
-    }
+  // Static NGO info (moved from backend)
+  const ngoInfo: NGOInfo = {
+    name: "Vridh Ashram",
+    mission:
+      "Our mission goes beyond providing basic necessities—it is about restoring self-worth, spreading kindness, and upholding the belief that every elder deserves to live with respect and compassion. Guided by the spirit of humanity, we strive to serve each resident with unconditional love, ensuring that they feel valued, cherished, and never alone.",
+    vision:
+      "A world where every individual has access to basic necessities and opportunities for growth.",
+    founded: "2010",
+    description:
+      "Vridh Ashram is a non-profit organization dedicated to creating positive change in underserved communities.",
+    programs: [],
+    impact: {
+      beneficiaries: 10000,
+      projects: 150,
+      volunteers: 500,
+      yearsActive: 13,
+    },
+    contact: {
+      address: "Amphalla",
+      phone: "+914564653151",
+      email: "info@vridhashram.org",
+      website: "www.virdhashram.org",
+    },
+    socialMedia: {
+      facebook: "/",
+      twitter: "/",
+      instagram: "/",
+      linkedin: "/",
+    },
   };
-
-  if (!ngoInfo) {
-    return <div className="loading-spinner">Loading...</div>;
-  }
 
   const members = [
     {
@@ -95,7 +106,7 @@ const About: React.FC = () => {
     title: "Director",
     image: "/images/director.png",
     message:
-      "Old age always happens at the point of no return and in every respect poses a serious challenge to every human being. Elderly person’s heart is burdened. He/she lives in fear of future, of unpredictive mishap, of bankruptcy, of ill-health, of lack of emotional touch and, greatest of all - lonliness. O, for someone, who will direct him/her to a realm of true, abiding joy! Such is the cry of his/her tormentd heart.Old age is an age of maturity and wisdom, of knowledge and experience, of reasoning and analysis, of faith and freedom, of service and sacrifice, of integrity and grace, of love and compassion and above all of God’s precious gift and boon",
+      "Old age always happens at the point of no return and in every respect poses a serious challenge to every human being. Elderly person’s heart is burdened. He/she lives in fear of future, of un predictive mishap, of bankruptcy, of ill-health, of lack of emotional touch and, greatest of all - loneliness. O, for someone, who will direct him/her to a realm of true, abiding joy! Such is the cry of his/her tormented heart.Old age is an age of maturity and wisdom, of knowledge and experience, of reasoning and analysis, of faith and freedom, of service and sacrifice, of integrity and grace, of love and compassion and above all of God’s precious gift and boon",
   };
 
   const secretary = {
@@ -103,7 +114,7 @@ const About: React.FC = () => {
     title: "Secretary",
     image: "/images/secretary.png",
     message:
-      "Each individual creature on this beautiful planet is created by God to fulfil a particular role. One rarely comes across divinely enlightened, compassionately humanitarian, exceptionally effulgence, diffidently down-to-earth, big-heartedly burden bearer, deeply influenced by the righteous deeds of divine souls, and Godly blessed individuals who precisely perceive and present an example of open-handed and magnanimous approach for the uncared for, impoverished, needy and miserable people. They are generally capable of envisioning the past, the present and the future in continuity. Their selfless, ethical, saintly, virtuous and pious actions and noble deeds survive the boundaries of time and space. Shri Ram Nath Prabhakar Ji, the Founder of “Home For The Aged & Infirm”, Ambphalla, Jammu was one such gift of God to humanity, particularly, for the uncared for, poorest of the poor, destitute and neglected people of Jammu and Kashmir State.",
+      "Each individual creature on this beautiful planet is created by God to fulfil a particular role. One rarely comes across divinely enlightened, compassionately humanitarian, exceptionally effulgence, diffidently down-to-earth, big-heartedly burden bearer, deeply influenced by the righteous deeds of divine souls, and Godly blessed individuals who precisely perceive and present an example of open-handed and magnanimous approach for the un-cared for, impoverished, needy and miserable people. They are generally capable of envisioning the past, the present and the future in continuity. Their selfless, ethical, saintly, virtuous and pious actions and noble deeds survive the boundaries of time and space. Shri Ram Nath Prabhakar Ji, the Founder of “Home For The Aged & Infirm”, Ambphalla, Jammu was one such gift of God to humanity, particularly, for the un-cared for, poorest of the poor, destitute and neglected people of Jammu and Kashmir State.",
   };
 
   const getInitials = (fullName: string) => {

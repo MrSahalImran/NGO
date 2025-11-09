@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import {
   FaPhone,
@@ -10,7 +10,6 @@ import {
   FaLinkedin,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
-import axios from "axios";
 
 interface NGOInfo {
   contact: {
@@ -27,7 +26,22 @@ interface NGOInfo {
 }
 
 const Contact = () => {
-  const [ngoInfo, setNgoInfo] = useState<NGOInfo | null>(null);
+  // Static contact info (moved from backend)
+  const NGO_INFO: NGOInfo = {
+    contact: {
+      email: "info@vridhashram.org",
+      phone: "+914564653151",
+      address: "Amphalla",
+    },
+    socialMedia: {
+      facebook: "/",
+      twitter: "/",
+      instagram: "/",
+      linkedin: "/",
+    },
+  };
+
+  const [ngoInfo] = useState<NGOInfo>(NGO_INFO);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -36,20 +50,11 @@ const Contact = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchNgoInfo();
-  }, []);
+  // NOTE: ngoInfo is static; no backend call required.
 
-  const fetchNgoInfo = async () => {
-    try {
-      const res = await axios.get("/api/ngo/info");
-      setNgoInfo(res.data);
-    } catch (error) {
-      console.error("Error fetching NGO info:", error);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -81,9 +86,7 @@ const Contact = () => {
     }
   };
 
-  if (!ngoInfo) {
-    return <div className="loading-spinner">Loading...</div>;
-  }
+  // no loading state required for static content
 
   return (
     <div>
