@@ -39,9 +39,6 @@ const Navbar: React.FC = () => {
             <LinkContainer to="/about">
               <Nav.Link>About</Nav.Link>
             </LinkContainer>
-            <LinkContainer to="/programs">
-              <Nav.Link>Programs</Nav.Link>
-            </LinkContainer>
             <LinkContainer to="/gallery">
               <Nav.Link>Gallery</Nav.Link>
             </LinkContainer>

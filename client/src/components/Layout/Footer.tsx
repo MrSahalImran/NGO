@@ -42,11 +42,6 @@ const Footer: React.FC = () => {
                 </a>
               </li>
               <li>
-                <a href="/programs" className="text-white-50">
-                  Our Programs
-                </a>
-              </li>
-              <li>
                 <a href="/donation" className="text-white-50">
                   Donate
                 </a>

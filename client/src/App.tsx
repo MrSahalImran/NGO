@@ -10,7 +10,6 @@ import Navbar from "./components/Layout/Navbar";
 import Footer from "./components/Layout/Footer";
 import Home from "./pages/Home";
 import About from "./pages/About";
-import Programs from "./pages/Programs";
 import Contact from "./pages/Contact";
 import Registration from "./pages/Registration";
 import Donation from "./pages/Donation";
@@ -47,14 +46,6 @@ const App: React.FC = () => {
               element={
                 <main className="main-content">
                   <About />
-                </main>
-              }
-            />
-            <Route
-              path="/programs"
-              element={
-                <main className="main-content">
-                  <Programs />
                 </main>
               }
             />
