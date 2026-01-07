@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Container,
   Row,
@@ -19,8 +19,6 @@ const Registration = () => {
     address: "",
     dateOfBirth: "",
     gender: "",
-    occupation: "",
-    interests: [] as string[],
     emergencyContact: {
       name: "",
       phone: "",
@@ -30,20 +28,11 @@ const Registration = () => {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const interestOptions = [
-    "Education",
-    "Healthcare",
-    "Environment",
-    "Poverty Alleviation",
-    "Community Development",
-    "Children Welfare",
-    "Women Empowerment",
-    "Elder Care",
-    "Disaster Relief",
-    "Fundraising",
-  ];
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
 
     if (name.startsWith("emergencyContact.")) {
@@ -63,16 +52,7 @@ const Registration = () => {
     }
   };
 
-  const handleInterestChange = (interest: string) => {
-    const updatedInterests = formData.interests.includes(interest)
-      ? formData.interests.filter((i) => i !== interest)
-      : [...formData.interests, interest];
-
-    setFormData({
-      ...formData,
-      interests: updatedInterests,
-    });
-  };
+  // interests removed
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -82,7 +62,7 @@ const Registration = () => {
       await axios.post("/api/registrations", formData);
 
       toast.success(
-        "Registration submitted successfully! We will review your application and get back to you soon."
+        "Resident admission submitted successfully. Admissions will review and contact you soon."
       );
       setSubmitted(true);
 
@@ -94,8 +74,6 @@ const Registration = () => {
         address: "",
         dateOfBirth: "",
         gender: "",
-        occupation: "",
-        interests: [] as string[],
         emergencyContact: {
           name: "",
           phone: "",
@@ -105,8 +83,7 @@ const Registration = () => {
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       const message =
-        err.response?.data?.message ||
-        "Registration failed. Please try again.";
+        err.response?.data?.message || "Registration failed. Please try again.";
       toast.error(message);
     } finally {
       setLoading(false);
@@ -119,14 +96,14 @@ const Registration = () => {
         <Row>
           <Col lg={8} className="mx-auto">
             <Alert variant="success" className="text-center p-5">
-              <h3>Thank You for Your Interest!</h3>
+              <h3>Resident Admission Submitted</h3>
               <p className="lead">
-                Your volunteer registration has been submitted successfully. Our
-                team will review your application and contact you within 2-3
-                business days.
+                The resident admission has been submitted successfully. Our
+                admissions team will review the details and contact you within
+                2-3 business days.
               </p>
               <Button variant="primary" onClick={() => setSubmitted(false)}>
-                Submit Another Registration
+                Submit Another Admission
               </Button>
             </Alert>
           </Col>
@@ -142,10 +119,11 @@ const Registration = () => {
         <Container>
           <Row>
             <Col lg={8} className="mx-auto text-center">
-              <h1>Volunteer Registration</h1>
+              <h1>Resident Admission</h1>
               <p className="lead">
-                Join our mission to create positive change in communities. Fill
-                out the form below to become a volunteer.
+                Register a resident for admission, intake, and care at the
+                facility. Fill out the form below with accurate resident
+                details.
               </p>
             </Col>
           </Row>
@@ -240,18 +218,6 @@ const Registration = () => {
                             </Form.Select>
                           </Form.Group>
                         </Col>
-                        <Col md={6}>
-                          <Form.Group className="mb-3">
-                            <Form.Label>Occupation</Form.Label>
-                            <Form.Control
-                              type="text"
-                              name="occupation"
-                              value={formData.occupation}
-                              onChange={handleChange}
-                              placeholder="Your current occupation"
-                            />
-                          </Form.Group>
-                        </Col>
                       </Row>
 
                       <Form.Group className="mb-3">
@@ -268,28 +234,7 @@ const Registration = () => {
                       </Form.Group>
                     </div>
 
-                    {/* Volunteer Interests */}
-                    <div className="mb-4">
-                      <h4 className="text-primary mb-3">Areas of Interest</h4>
-                      <p className="text-muted mb-3">
-                        Select the areas you would like to volunteer in (select
-                        multiple):
-                      </p>
-
-                      <Row>
-                        {interestOptions.map((interest) => (
-                          <Col md={6} lg={4} key={interest} className="mb-2">
-                            <Form.Check
-                              type="checkbox"
-                              id={interest}
-                              label={interest}
-                              checked={formData.interests.includes(interest)}
-                              onChange={() => handleInterestChange(interest)}
-                            />
-                          </Col>
-                        ))}
-                      </Row>
-                    </div>
+                    {/* Volunteer Interests removed */}
 
                     {/* Emergency Contact */}
                     <div className="mb-4">
@@ -346,7 +291,9 @@ const Registration = () => {
                         disabled={loading}
                         className="px-5"
                       >
-                        {loading ? "Submitting..." : "Submit Registration"}
+                        {loading
+                          ? "Submitting..."
+                          : "Submit Resident Admission"}
                       </Button>
                     </div>
 
@@ -381,8 +328,11 @@ const Registration = () => {
                   >
                     <strong>1</strong>
                   </div>
-                  <h5 className="mt-3">Application Review</h5>
-                  <p>We'll review your application within 2-3 business days.</p>
+                  <h5 className="mt-3">Intake Review</h5>
+                  <p>
+                    Our admissions team will verify submitted details and
+                    records.
+                  </p>
                 </Col>
                 <Col md={4} className="text-center mb-4">
                   <div
@@ -391,10 +341,10 @@ const Registration = () => {
                   >
                     <strong>2</strong>
                   </div>
-                  <h5 className="mt-3">Orientation</h5>
+                  <h5 className="mt-3">Medical Assessment</h5>
                   <p>
-                    Attend a brief orientation session to learn about our
-                    programs.
+                    The inmate will undergo a basic medical and welfare
+                    assessment.
                   </p>
                 </Col>
                 <Col md={4} className="text-center mb-4">
@@ -404,9 +354,10 @@ const Registration = () => {
                   >
                     <strong>3</strong>
                   </div>
-                  <h5 className="mt-3">Start Volunteering</h5>
+                  <h5 className="mt-3">Placement & Care Plan</h5>
                   <p>
-                    Begin making a difference in your chosen area of interest.
+                    We will assign a placement and care plan tailored to the
+                    inmate's needs.
                   </p>
                 </Col>
               </Row>
