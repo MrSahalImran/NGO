@@ -24,9 +24,8 @@ interface Registration {
   registeredAt: string;
   dateOfBirth: string;
   gender: string;
-  occupation?: string;
   address: string;
-  interests: string[];
+  // interests removed
   emergencyContact: {
     name: string;
     phone: string;
@@ -284,10 +283,6 @@ const Registrations: React.FC = () => {
                   <strong>Gender:</strong> {selectedRegistration.gender}
                 </p>
                 <p>
-                  <strong>Occupation:</strong>{" "}
-                  {selectedRegistration.occupation || "Not specified"}
-                </p>
-                <p>
                   <strong>Address:</strong> {selectedRegistration.address}
                 </p>
               </Col>
@@ -303,14 +298,7 @@ const Registrations: React.FC = () => {
                     selectedRegistration.registeredAt
                   ).toLocaleDateString()}
                 </p>
-                <p>
-                  <strong>Areas of Interest:</strong>
-                </p>
-                <ul>
-                  {selectedRegistration.interests.map((interest, index) => (
-                    <li key={index}>{interest}</li>
-                  ))}
-                </ul>
+                {/* interests removed */}
 
                 <h6>Emergency Contact</h6>
                 <p>

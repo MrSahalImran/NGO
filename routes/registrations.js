@@ -1,10 +1,14 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const Registration = require("../models/Registration");
+const { sendMailSafe } = require("../utils/mailer");
+const logger = require("../utils/logger");
 
 const router = express.Router();
 
-// Create registration
+/**
+ * CREATE REGISTRATION
+ */
 router.post(
   "/",
   [
@@ -35,48 +39,63 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const registrationData = req.body;
-      const registration = new Registration(registrationData);
-
+      const registration = new Registration(req.body);
       await registration.save();
-      res
-        .status(201)
-        .json({ message: "Registration submitted successfully", registration });
+
+      logger.log("[registrations] New registration created:", registration._id);
+
+      res.status(201).json({
+        message: "Registration submitted successfully",
+        registration,
+      });
     } catch (error) {
-      console.error(error.message);
+      logger.error("[registrations] Create error:", error);
       res.status(500).send("Server error");
     }
   }
 );
 
-// Get all registrations (for admin)
+/**
+ * GET ALL REGISTRATIONS (ADMIN)
+ */
 router.get("/", async (req, res) => {
   try {
-    const registrations = await Registration.find().sort({ registeredAt: -1 });
+    const registrations = await Registration.find().sort({
+      registeredAt: -1,
+    });
+
     res.json(registrations);
   } catch (error) {
-    console.error(error.message);
+    logger.error("[registrations] Fetch all error:", error);
     res.status(500).send("Server error");
   }
 });
 
-// Get registration by ID
+/**
+ * GET REGISTRATION BY ID
+ */
 router.get("/:id", async (req, res) => {
   try {
     const registration = await Registration.findById(req.params.id);
+
     if (!registration) {
       return res.status(404).json({ message: "Registration not found" });
     }
+
     res.json(registration);
   } catch (error) {
-    console.error(error.message);
+    logger.error("[registrations] Fetch by ID error:", error);
     res.status(500).send("Server error");
   }
 });
 
-// Update registration status
+/**
+ * UPDATE REGISTRATION STATUS
+ */
 router.patch("/:id/status", async (req, res) => {
   try {
+    logger.log(`[registrations] PATCH status called`, req.params.id, req.body);
+
     const { status } = req.body;
 
     if (!["pending", "approved", "rejected"].includes(status)) {
@@ -93,9 +112,65 @@ router.patch("/:id/status", async (req, res) => {
       return res.status(404).json({ message: "Registration not found" });
     }
 
+    logger.log(
+      `[registrations] Status updated`,
+      registration._id,
+      registration.status
+    );
+
+    /**
+     * SEND EMAIL ON APPROVAL (BEST EFFORT)
+     */
+    if (status === "approved" && registration.email) {
+      try {
+        const subject = "Resident Admission Approved";
+
+        const text = `Dear ${registration.name || "Applicant"},
+
+We are pleased to inform you that your resident admission request has been approved.
+
+Our admissions team will contact you with next steps and further instructions.
+
+Regards,
+Virdh Ashram`;
+
+        const html = `
+          <p>Dear ${registration.name || "Applicant"},</p>
+          <p><strong>We are pleased to inform you</strong> that your resident admission request has been <strong>approved</strong>.</p>
+          <p>Our admissions team will contact you with next steps and further instructions.</p>
+          <p>Regards,<br/>Virdh Ashram</p>
+        `;
+
+        const mailOptions = {
+          to: registration.email,
+          subject,
+          text,
+          html,
+        };
+
+        logger.log(
+          `[registrations] Sending approval email to`,
+          registration.email
+        );
+
+        const mailResult = await sendMailSafe(mailOptions);
+
+        if (!mailResult.ok) {
+          logger.warn(
+            `[registrations] Email failed`,
+            mailResult.error || mailResult
+          );
+        } else {
+          logger.log(`[registrations] Email sent`, mailResult.info?.messageId);
+        }
+      } catch (mailError) {
+        logger.error("[registrations] Email sending exception:", mailError);
+      }
+    }
+
     res.json(registration);
   } catch (error) {
-    console.error(error.message);
+    logger.error("[registrations] Status update error:", error);
     res.status(500).send("Server error");
   }
 });
