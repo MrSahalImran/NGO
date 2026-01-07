@@ -1,6 +1,22 @@
 const Donation = require("../models/Donation");
 const { cloudinary } = require("../config/cloudinary");
 const { sendMailSafe } = require("../utils/mailer");
+const generate80G = require("../utils/generate80g");
+
+// Upload a Buffer to Cloudinary and return { url, public_id }
+const uploadBufferToCloudinary = (buffer, filename) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: "auto", folder: "certificates", public_id: filename },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve({ url: result.secure_url, public_id: result.public_id });
+      }
+    );
+
+    stream.end(buffer);
+  });
+};
 
 // POST /api/donations/submit
 exports.submitDonation = async (req, res) => {
@@ -188,9 +204,39 @@ exports.verifyDonation = async (req, res) => {
 
     await donation.save();
 
-    // TODO: Generate 80G certificate PDF (will implement next)
+    // Generate 80G certificate PDF and upload to Cloudinary (preferred)
+    let pdfBuffer = null;
+    try {
+      pdfBuffer = await generate80G(donation, {
+        name: process.env.ORG_NAME,
+        address: process.env.ORG_ADDRESS,
+        signatoryName: process.env.ORG_SIGNATORY,
+      });
+      // Attempt upload to Cloudinary
+      try {
+        const filename = `80G_${donation._id}_${Date.now()}`;
+        const uploadRes = await uploadBufferToCloudinary(pdfBuffer, filename);
+        donation.certificateUrl = uploadRes.url;
+        donation.certificateCloudinaryId = uploadRes.public_id;
+        await donation.save();
+      } catch (upErr) {
+        console.error("Failed uploading certificate to Cloudinary:", upErr);
+      }
+    } catch (pdfErr) {
+      console.error("80G PDF generation failed:", pdfErr);
+    }
 
-    // Send 80G certificate email to donor
+    // Build attachment list: prefer cloud URL (as path) else attach buffer
+    const attachments = [];
+    if (donation.certificateUrl) {
+      attachments.push({ path: donation.certificateUrl });
+    } else if (pdfBuffer) {
+      attachments.push({
+        filename: `${donation.receiptNumber || "80G-Certificate"}.pdf`,
+        content: pdfBuffer,
+      });
+    }
+
     const mailOptions = {
       to: donation.email,
       subject: "80G Tax Exemption Certificate - Vridh Ashram",
@@ -207,23 +253,38 @@ exports.verifyDonation = async (req, res) => {
         ).toLocaleDateString()}</p>
         <br>
         <p>This donation is eligible for tax deduction under Section 80G of the Income Tax Act, 1961.</p>
-        <p>Your certificate will be attached to this email (PDF generation coming soon).</p>
+        <p>Your certificate is attached to this email. You can also download it from: ${
+          donation.certificateUrl || "(attached)"
+        }</p>
         <br>
         <p>Thank you for supporting our cause!</p>
         <p>Best regards,<br>Vridh Ashram Team</p>
       `,
+      attachments,
     };
 
     const certSend = await sendMailSafe(mailOptions);
     if (certSend.ok) {
       donation.status = "certificate_sent";
+      // clear any previous mail failure log on success
+      donation.mailFailures = [];
       await donation.save();
     } else {
-      console.warn(
+      console.error(
         "Certificate email failed:",
         certSend.error?.message || certSend.error
       );
-      // keep status as verified so admin can retry sending later when SMTP fixed
+      // record mail failure for admin visibility
+      donation.mailFailures = donation.mailFailures || [];
+      donation.mailFailures.push({
+        when: new Date(),
+        error:
+          (certSend.error && certSend.error.message) ||
+          certSend.error ||
+          "unknown",
+      });
+      await donation.save();
+      // keep status as verified so admin can retry sending later
     }
 
     res.json({
@@ -297,5 +358,97 @@ exports.rejectDonation = async (req, res) => {
       message: "Failed to reject donation",
       error: error.message,
     });
+  }
+};
+
+// PUT /api/donations/:id/resend-certificate
+exports.resendCertificate = async (req, res) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+
+    if (!donation) {
+      return res.status(404).json({ message: "Donation not found" });
+    }
+
+    if (donation.status === "pending") {
+      return res
+        .status(400)
+        .json({ message: "Donation is still pending verification" });
+    }
+
+    // Prefer existing cloud-hosted certificate if present
+    let attachments = [];
+    if (donation.certificateUrl) {
+      attachments.push({ path: donation.certificateUrl });
+    } else {
+      // generate and upload
+      try {
+        const pdfBuffer = await generate80G(donation, {
+          name: process.env.ORG_NAME,
+          address: process.env.ORG_ADDRESS,
+          signatoryName: process.env.ORG_SIGNATORY,
+        });
+        try {
+          const filename = `80G_${donation._id}_${Date.now()}`;
+          const uploadRes = await uploadBufferToCloudinary(pdfBuffer, filename);
+          donation.certificateUrl = uploadRes.url;
+          donation.certificateCloudinaryId = uploadRes.public_id;
+          await donation.save();
+          attachments.push({ path: donation.certificateUrl });
+        } catch (upErr) {
+          // fallback to attaching buffer
+          console.error(
+            "Failed uploading certificate to Cloudinary (resend):",
+            upErr
+          );
+          attachments.push({
+            filename: `${donation.receiptNumber || "80G-Certificate"}.pdf`,
+            content: pdfBuffer,
+          });
+        }
+      } catch (pdfErr) {
+        console.error("80G PDF generation failed (resend):", pdfErr);
+      }
+    }
+
+    const mailOptions = {
+      to: donation.email,
+      subject: "80G Tax Exemption Certificate - Vridh Ashram",
+      html: `
+        <h2>80G Tax Exemption Certificate</h2>
+        <p>Dear ${donation.donorName},</p>
+        <p>Please find attached your 80G certificate for donation.</p>
+        <p><strong>Receipt Number:</strong> ${donation.receiptNumber}</p>
+        <p><strong>Donation Amount:</strong> ₹${donation.amount}</p>
+        <br>
+        <p>Best regards,<br>Vridh Ashram Team</p>
+      `,
+      attachments,
+    };
+
+    const send = await sendMailSafe(mailOptions);
+    if (send.ok) {
+      donation.status = "certificate_sent";
+      donation.mailFailures = [];
+      await donation.save();
+      return res.json({ message: "Certificate resent successfully", donation });
+    }
+
+    console.error(
+      "Resend certificate failed:",
+      send.error?.message || send.error
+    );
+    donation.mailFailures = donation.mailFailures || [];
+    donation.mailFailures.push({
+      when: new Date(),
+      error: (send.error && send.error.message) || send.error || "unknown",
+    });
+    await donation.save();
+    return res.status(500).json({ message: "Failed to resend certificate" });
+  } catch (error) {
+    console.error("Resend certificate error:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to resend certificate", error: error.message });
   }
 };

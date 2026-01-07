@@ -141,6 +141,27 @@ const Donations: React.FC = () => {
     }
   };
 
+  const handleResendCertificate = async (donationId: string) => {
+    if (!window.confirm("Resend 80G certificate to donor?")) return;
+    try {
+      setProcessing(true);
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `${apiUrl}/api/donations/${donationId}/resend-certificate`,
+        {},
+        { headers: { "x-auth-token": token } }
+      );
+
+      fetchDonations();
+      alert("Certificate resent successfully");
+    } catch (err) {
+      alert("Failed to resend certificate");
+      console.error(err);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
@@ -326,6 +347,19 @@ const Donations: React.FC = () => {
                           >
                             View
                           </Button>
+                          {(donation.status === "verified" ||
+                            (donation as any).mailFailures?.length > 0) && (
+                            <Button
+                              size="sm"
+                              variant="outline-secondary"
+                              className="ms-2"
+                              onClick={() =>
+                                handleResendCertificate(donation._id)
+                              }
+                            >
+                              Resend
+                            </Button>
+                          )}
                         </div>
                       </Card.Body>
                     </Card>
@@ -373,6 +407,19 @@ const Donations: React.FC = () => {
                         >
                           View
                         </Button>
+                        {(donation.status === "verified" ||
+                          (donation as any).mailFailures?.length > 0) && (
+                          <Button
+                            size="sm"
+                            variant="outline-secondary"
+                            className="ms-2"
+                            onClick={() =>
+                              handleResendCertificate(donation._id)
+                            }
+                          >
+                            Resend
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -480,6 +527,15 @@ const Donations: React.FC = () => {
                   {processing ? "Processing..." : "Verify & Send Certificate"}
                 </Button>
               </>
+            )}
+            {selectedDonation && selectedDonation.status !== "pending" && (
+              <Button
+                variant="outline-primary"
+                onClick={() => handleResendCertificate(selectedDonation._id)}
+                disabled={processing}
+              >
+                {processing ? "Processing..." : "Resend Certificate"}
+              </Button>
             )}
             <Button variant="secondary" onClick={() => setShowModal(false)}>
               Close

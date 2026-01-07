@@ -43,4 +43,10 @@ router.put("/:id/verify", auth, isAdmin, verifyDonation);
 // @access  Private (Admin)
 router.put("/:id/reject", auth, isAdmin, rejectDonation);
 
+// @route   PUT /api/donations/:id/resend-certificate
+// @desc    Resend 80G certificate to donor (Admin only)
+// @access  Private (Admin)
+const { resendCertificate } = require("../controllers/donationsController");
+router.put("/:id/resend-certificate", auth, isAdmin, resendCertificate);
+
 module.exports = router;

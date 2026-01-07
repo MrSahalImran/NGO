@@ -17,7 +17,8 @@ interface AdminLayoutProps {
     | "registrations"
     | "payments"
     | "donations"
-    | "photos";
+    | "photos"
+    | "certificates";
   title: string;
 }
 
@@ -61,6 +62,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
       to: "/admin/photos",
       icon: FaImages,
       label: "Photos",
+    },
+    {
+      key: "certificates",
+      to: "/admin/certificates",
+      icon: FaHandHoldingHeart,
+      label: "Certificates",
     },
   ];
 
