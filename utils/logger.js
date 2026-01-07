@@ -8,7 +8,6 @@ module.exports = {
     if (isDev) console.warn(...args);
   },
   error: (...args) => {
-    // Errors should ALWAYS be logged (even in prod)
     console.error(...args);
   },
 };
