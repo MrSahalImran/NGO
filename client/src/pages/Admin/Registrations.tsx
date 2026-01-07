@@ -166,8 +166,8 @@ const Registrations: React.FC = () => {
               <thead className="table-dark">
                 <tr>
                   <th>Name</th>
-                  <th className="d-none d-md-table-cell">Email</th>
-                  <th className="d-none d-lg-table-cell">Phone</th>
+                  <th className="d-none d-md-table-cell">Emergency Email</th>
+                  <th className="d-none d-lg-table-cell">Emergency Phone</th>
                   <th>Status</th>
                   <th className="d-none d-sm-table-cell">Date</th>
                   <th>Actions</th>
@@ -180,22 +180,23 @@ const Registrations: React.FC = () => {
                       <div>
                         <div className="fw-medium">{registration.name}</div>
                         <small className="text-muted d-md-none">
-                          {registration.email ||
-                            registration.emergencyContact?.email}
+                          {registration.emergencyContact?.email || "—"}
                         </small>
                         <div className="d-lg-none">
                           <small className="text-muted">
-                            {registration.phone}
+                            {registration.emergencyContact?.phone ||
+                              registration.phone}
                           </small>
                         </div>
                       </div>
                     </td>
                     <td className="d-none d-md-table-cell">
-                      {registration.email ||
-                        registration.emergencyContact?.email}
+                      {registration.emergencyContact?.email || "—"}
                     </td>
                     <td className="d-none d-lg-table-cell">
-                      {registration.phone}
+                      {registration.emergencyContact?.phone ||
+                        registration.phone ||
+                        "—"}
                     </td>
                     <td>{getStatusBadge(registration.status)}</td>
                     <td className="d-none d-sm-table-cell">
@@ -311,6 +312,10 @@ const Registrations: React.FC = () => {
                 <p>
                   <strong>Name:</strong>{" "}
                   {selectedRegistration.emergencyContact.name}
+                </p>
+                <p>
+                  <strong>Email:</strong>{" "}
+                  {selectedRegistration.emergencyContact.email || "—"}
                 </p>
                 <p>
                   <strong>Phone:</strong>{" "}
