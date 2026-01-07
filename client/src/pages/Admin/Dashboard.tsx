@@ -116,12 +116,14 @@ const Dashboard: React.FC = () => {
                                 {registration.name}
                               </div>
                               <small className="text-muted d-md-none">
-                                {registration.email}
+                                {registration.email ||
+                                  registration.emergencyContact?.email}
                               </small>
                             </div>
                           </td>
                           <td className="d-none d-md-table-cell">
-                            {registration.email}
+                            {registration.email ||
+                              registration.emergencyContact?.email}
                           </td>
                           <td>
                             <Badge

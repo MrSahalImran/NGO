@@ -28,6 +28,7 @@ interface Registration {
   // interests removed
   emergencyContact: {
     name: string;
+    email?: string;
     phone: string;
     relationship: string;
   };
@@ -84,9 +85,11 @@ const Registrations: React.FC = () => {
   };
 
   const filteredRegistrations = registrations.filter((registration) => {
+    const emailToSearch =
+      registration.email || registration.emergencyContact?.email || "";
     const matchesSearch =
       registration.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      registration.email.toLowerCase().includes(searchTerm.toLowerCase());
+      emailToSearch.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || registration.status === statusFilter;
 
@@ -177,7 +180,8 @@ const Registrations: React.FC = () => {
                       <div>
                         <div className="fw-medium">{registration.name}</div>
                         <small className="text-muted d-md-none">
-                          {registration.email}
+                          {registration.email ||
+                            registration.emergencyContact?.email}
                         </small>
                         <div className="d-lg-none">
                           <small className="text-muted">
@@ -187,7 +191,8 @@ const Registrations: React.FC = () => {
                       </div>
                     </td>
                     <td className="d-none d-md-table-cell">
-                      {registration.email}
+                      {registration.email ||
+                        registration.emergencyContact?.email}
                     </td>
                     <td className="d-none d-lg-table-cell">
                       {registration.phone}
@@ -268,7 +273,9 @@ const Registrations: React.FC = () => {
                   <strong>Name:</strong> {selectedRegistration.name}
                 </p>
                 <p>
-                  <strong>Email:</strong> {selectedRegistration.email}
+                  <strong>Email:</strong>{" "}
+                  {selectedRegistration.email ||
+                    selectedRegistration.emergencyContact?.email}
                 </p>
                 <p>
                   <strong>Phone:</strong> {selectedRegistration.phone}

@@ -8,7 +8,6 @@ const registrationSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
     lowercase: true,
     trim: true,
   },
@@ -42,6 +41,12 @@ const registrationSchema = new mongoose.Schema({
     },
   ],
   emergencyContact: {
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
     name: {
       type: String,
       required: true,

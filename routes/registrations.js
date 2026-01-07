@@ -13,7 +13,10 @@ router.post(
   "/",
   [
     body("name").notEmpty().withMessage("Name is required"),
-    body("email").isEmail().withMessage("Please include a valid email"),
+    body("email")
+      .optional()
+      .isEmail()
+      .withMessage("Please include a valid email"),
     body("phone").notEmpty().withMessage("Phone is required"),
     body("address").notEmpty().withMessage("Address is required"),
     body("dateOfBirth")
@@ -22,6 +25,12 @@ router.post(
     body("gender")
       .isIn(["Male", "Female", "Other"])
       .withMessage("Gender must be Male, Female, or Other"),
+    body("emergencyContact.email")
+      .notEmpty()
+      .withMessage("Emergency contact email is required")
+      .bail()
+      .isEmail()
+      .withMessage("Please include a valid emergency contact email"),
     body("emergencyContact.name")
       .notEmpty()
       .withMessage("Emergency contact name is required"),
@@ -44,12 +53,20 @@ router.post(
 
       logger.log("[registrations] New registration created:", registration._id);
 
-      res.status(201).json({
-        message: "Registration submitted successfully",
-        registration,
-      });
+      res
+        .status(201)
+        .json({ message: "Registration submitted successfully", registration });
     } catch (error) {
       logger.error("[registrations] Create error:", error);
+      if (process.env.NODE_ENV === "development") {
+        return res
+          .status(500)
+          .json({
+            message: "Server error",
+            error: error.message,
+            stack: error.stack,
+          });
+      }
       res.status(500).send("Server error");
     }
   }
@@ -60,10 +77,7 @@ router.post(
  */
 router.get("/", async (req, res) => {
   try {
-    const registrations = await Registration.find().sort({
-      registeredAt: -1,
-    });
-
+    const registrations = await Registration.find().sort({ registeredAt: -1 });
     res.json(registrations);
   } catch (error) {
     logger.error("[registrations] Fetch all error:", error);
@@ -77,11 +91,8 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const registration = await Registration.findById(req.params.id);
-
-    if (!registration) {
+    if (!registration)
       return res.status(404).json({ message: "Registration not found" });
-    }
-
     res.json(registration);
   } catch (error) {
     logger.error("[registrations] Fetch by ID error:", error);
@@ -97,7 +108,6 @@ router.patch("/:id/status", async (req, res) => {
     logger.log(`[registrations] PATCH status called`, req.params.id, req.body);
 
     const { status } = req.body;
-
     if (!["pending", "approved", "rejected"].includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
@@ -107,64 +117,39 @@ router.patch("/:id/status", async (req, res) => {
       { status },
       { new: true }
     );
-
-    if (!registration) {
+    if (!registration)
       return res.status(404).json({ message: "Registration not found" });
-    }
 
     logger.log(
-      `[registrations] Status updated`,
+      "[registrations] Status updated",
       registration._id,
       registration.status
     );
 
-    /**
-     * SEND EMAIL ON APPROVAL (BEST EFFORT)
-     */
-    if (status === "approved" && registration.email) {
-      try {
-        const subject = "Resident Admission Approved";
+    // SEND EMAIL ON APPROVAL (BEST-EFFORT)
+    if (status === "approved") {
+      const toEmail =
+        registration.email || registration.emergencyContact?.email;
+      if (toEmail) {
+        try {
+          const subject = "Resident Admission Approved";
+          const text = `Dear ${
+            registration.name || "Applicant"
+          },\n\nWe are pleased to inform you that your resident admission request has been approved.\n\nOur admissions team will contact you with next steps and further instructions.\n\nRegards,\nVirdh Ashram`;
+          const html = `<p>Dear ${
+            registration.name || "Applicant"
+          },</p><p><strong>We are pleased to inform you</strong> that your resident admission request has been <strong>approved</strong>.</p><p>Our admissions team will contact you with next steps and further instructions.</p><p>Regards,<br/>Virdh Ashram</p>`;
 
-        const text = `Dear ${registration.name || "Applicant"},
-
-We are pleased to inform you that your resident admission request has been approved.
-
-Our admissions team will contact you with next steps and further instructions.
-
-Regards,
-Virdh Ashram`;
-
-        const html = `
-          <p>Dear ${registration.name || "Applicant"},</p>
-          <p><strong>We are pleased to inform you</strong> that your resident admission request has been <strong>approved</strong>.</p>
-          <p>Our admissions team will contact you with next steps and further instructions.</p>
-          <p>Regards,<br/>Virdh Ashram</p>
-        `;
-
-        const mailOptions = {
-          to: registration.email,
-          subject,
-          text,
-          html,
-        };
-
-        logger.log(
-          `[registrations] Sending approval email to`,
-          registration.email
-        );
-
-        const mailResult = await sendMailSafe(mailOptions);
-
-        if (!mailResult.ok) {
-          logger.warn(
-            `[registrations] Email failed`,
-            mailResult.error || mailResult
-          );
-        } else {
-          logger.log(`[registrations] Email sent`, mailResult.info?.messageId);
+          const mailOptions = { to: toEmail, subject, text, html };
+          const mailResult = await sendMailSafe(mailOptions);
+          if (!mailResult.ok)
+            logger.warn(
+              "[registrations] Email failed",
+              mailResult.error || mailResult
+            );
+        } catch (mailError) {
+          logger.error("[registrations] Email sending exception:", mailError);
         }
-      } catch (mailError) {
-        logger.error("[registrations] Email sending exception:", mailError);
       }
     }
 

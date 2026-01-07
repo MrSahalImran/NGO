@@ -14,13 +14,13 @@ import axios from "axios";
 const Registration = () => {
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
     phone: "",
     address: "",
     dateOfBirth: "",
     gender: "",
     emergencyContact: {
       name: "",
+      email: "",
       phone: "",
       relationship: "",
     },
@@ -69,13 +69,13 @@ const Registration = () => {
       // Reset form
       setFormData({
         name: "",
-        email: "",
         phone: "",
         address: "",
         dateOfBirth: "",
         gender: "",
         emergencyContact: {
           name: "",
+          email: "",
           phone: "",
           relationship: "",
         },
@@ -147,36 +147,20 @@ const Registration = () => {
                       <Row>
                         <Col md={6}>
                           <Form.Group className="mb-3">
-                            <Form.Label>Full Name *</Form.Label>
+                            <Form.Label>Resident Full Name *</Form.Label>
                             <Form.Control
                               type="text"
                               name="name"
                               value={formData.name}
                               onChange={handleChange}
                               required
-                              placeholder="Enter your full name"
+                              placeholder="Enter resident full name"
                             />
                           </Form.Group>
                         </Col>
                         <Col md={6}>
                           <Form.Group className="mb-3">
-                            <Form.Label>Email Address *</Form.Label>
-                            <Form.Control
-                              type="email"
-                              name="email"
-                              value={formData.email}
-                              onChange={handleChange}
-                              required
-                              placeholder="your.email@example.com"
-                            />
-                          </Form.Group>
-                        </Col>
-                      </Row>
-
-                      <Row>
-                        <Col md={6}>
-                          <Form.Group className="mb-3">
-                            <Form.Label>Phone Number *</Form.Label>
+                            <Form.Label>Resident Phone Number *</Form.Label>
                             <Form.Control
                               type="tel"
                               name="phone"
@@ -187,6 +171,9 @@ const Registration = () => {
                             />
                           </Form.Group>
                         </Col>
+                      </Row>
+
+                      <Row>
                         <Col md={6}>
                           <Form.Group className="mb-3">
                             <Form.Label>Date of Birth *</Form.Label>
@@ -199,12 +186,9 @@ const Registration = () => {
                             />
                           </Form.Group>
                         </Col>
-                      </Row>
-
-                      <Row>
                         <Col md={6}>
                           <Form.Group className="mb-3">
-                            <Form.Label>Gender *</Form.Label>
+                            <Form.Label>Resident Gender *</Form.Label>
                             <Form.Select
                               name="gender"
                               value={formData.gender}
@@ -221,7 +205,7 @@ const Registration = () => {
                       </Row>
 
                       <Form.Group className="mb-3">
-                        <Form.Label>Address *</Form.Label>
+                        <Form.Label>Resident Address *</Form.Label>
                         <Form.Control
                           as="textarea"
                           rows={2}
@@ -238,12 +222,16 @@ const Registration = () => {
 
                     {/* Emergency Contact */}
                     <div className="mb-4">
-                      <h4 className="text-primary mb-3">Emergency Contact</h4>
+                      <h4 className="text-primary mb-3">
+                        Registrant / Emergency Contact
+                      </h4>
 
                       <Row>
                         <Col md={6}>
                           <Form.Group className="mb-3">
-                            <Form.Label>Contact Name *</Form.Label>
+                            <Form.Label>
+                              Registrant Name (person admitting resident) *
+                            </Form.Label>
                             <Form.Control
                               type="text"
                               name="emergencyContact.name"
@@ -256,7 +244,7 @@ const Registration = () => {
                         </Col>
                         <Col md={6}>
                           <Form.Group className="mb-3">
-                            <Form.Label>Contact Phone *</Form.Label>
+                            <Form.Label>Registrant Phone *</Form.Label>
                             <Form.Control
                               type="tel"
                               name="emergencyContact.phone"
@@ -268,6 +256,18 @@ const Registration = () => {
                           </Form.Group>
                         </Col>
                       </Row>
+
+                      <Form.Group className="mb-3">
+                        <Form.Label>Registrant Email *</Form.Label>
+                        <Form.Control
+                          type="email"
+                          name="emergencyContact.email"
+                          value={formData.emergencyContact.email}
+                          onChange={handleChange}
+                          required
+                          placeholder="contact.email@example.com"
+                        />
+                      </Form.Group>
 
                       <Form.Group className="mb-3">
                         <Form.Label>Relationship *</Form.Label>
@@ -343,7 +343,7 @@ const Registration = () => {
                   </div>
                   <h5 className="mt-3">Medical Assessment</h5>
                   <p>
-                    The inmate will undergo a basic medical and welfare
+                    The resident will undergo a basic medical and welfare
                     assessment.
                   </p>
                 </Col>
@@ -357,7 +357,7 @@ const Registration = () => {
                   <h5 className="mt-3">Placement & Care Plan</h5>
                   <p>
                     We will assign a placement and care plan tailored to the
-                    inmate's needs.
+                    resident's needs.
                   </p>
                 </Col>
               </Row>
