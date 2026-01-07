@@ -3,7 +3,6 @@ import { Container, Row, Col, Nav, Button } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import {
   FaUsers,
-  FaDollarSign,
   FaChartBar,
   FaBars,
   FaTimes,
@@ -50,12 +49,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
       icon: FaUsers,
       label: "Registrations",
     },
-    {
-      key: "payments",
-      to: "/admin/payments",
-      icon: FaDollarSign,
-      label: "Old Donations",
-    },
+
     {
       key: "donations",
       to: "/admin/donations",
