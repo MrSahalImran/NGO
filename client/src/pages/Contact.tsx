@@ -6,9 +6,6 @@ import {
   FaEnvelope,
   FaMapMarkerAlt,
   FaFacebook,
-  FaTwitter,
-  FaInstagram,
-  FaLinkedin,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -20,9 +17,6 @@ interface NGOInfo {
   };
   socialMedia: {
     facebook?: string;
-    twitter?: string;
-    instagram?: string;
-    linkedin?: string;
   };
 }
 
@@ -36,9 +30,6 @@ const Contact = () => {
     },
     socialMedia: {
       facebook: "/",
-      twitter: "/",
-      instagram: "/",
-      linkedin: "/",
     },
   };
 
@@ -151,30 +142,6 @@ const Contact = () => {
                         rel="noopener noreferrer"
                       >
                         <FaFacebook size={24} />
-                      </a>
-                      <a
-                        href={ngoInfo.socialMedia.twitter}
-                        className="text-primary me-3"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <FaTwitter size={24} />
-                      </a>
-                      <a
-                        href={ngoInfo.socialMedia.instagram}
-                        className="text-primary me-3"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <FaInstagram size={24} />
-                      </a>
-                      <a
-                        href={ngoInfo.socialMedia.linkedin}
-                        className="text-primary"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <FaLinkedin size={24} />
                       </a>
                     </div>
                   </div>
