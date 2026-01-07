@@ -36,8 +36,8 @@ mongoose
 const routes = [
   { path: "/api/auth", file: "./routes/auth" },
   { path: "/api/registrations", file: "./routes/registrations" },
-  { path: "/api/payments", file: "./routes/payments" },
   { path: "/api/admin", file: "./routes/admin" },
+  { path: "/api/contact", file: "./routes/contact" },
   { path: "/api/ngo", file: "./routes/ngo" },
   { path: "/api/photos", file: "./routes/photos" },
   { path: "/api/donations", file: "./routes/donations" },

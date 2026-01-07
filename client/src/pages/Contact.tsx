@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import {
   FaPhone,
@@ -29,7 +30,7 @@ const Contact = () => {
   // Static contact info (moved from backend)
   const NGO_INFO: NGOInfo = {
     contact: {
-      email: "info@vridhashram.org",
+      email: "virdhashramjmu@gmail.com",
       phone: "+914564653151",
       address: "Amphalla",
     },
@@ -64,23 +65,22 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      // In a real application, you would send this to your backend
-      // For demo purposes, we'll just show a success message
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-
-      toast.success(
-        "Thank you for your message! We will get back to you soon."
-      );
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
-    } catch {
-      toast.error("Failed to send message. Please try again.");
+      const res = await axios.post("/api/contact", formData);
+      if (res.status === 200 || res.status === 201) {
+        toast.success(
+          "Thank you for your message! We will get back to you soon."
+        );
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      } else {
+        toast.error("Failed to send message. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("Contact send error:", err?.response || err);
+      const msg =
+        err?.response?.data?.message ||
+        "Failed to send message. Please try again.";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
