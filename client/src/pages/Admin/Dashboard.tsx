@@ -21,8 +21,8 @@ const Dashboard: React.FC = () => {
     try {
       const res = await axios.get("/api/admin/dashboard");
       setDashboardData(res.data);
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+    } catch (err) {
+      console.error("Failed to load dashboard data", err);
     } finally {
       setLoading(false);
     }
@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="loading-spinner">
+      <div className="loading-spinner text-center py-5">
         <Spinner animation="border" role="status">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
@@ -40,7 +40,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <AdminLayout activePage="dashboard" title="Admin Dashboard">
-      {/* Statistics Cards */}
+      {/* STAT CARDS */}
       <Row className="admin-stats-row">
         <Col xs={6} lg={3} className="mb-3">
           <Card className="admin-stats-card card-hover h-100">
@@ -53,6 +53,7 @@ const Dashboard: React.FC = () => {
             </Card.Body>
           </Card>
         </Col>
+
         <Col xs={6} lg={3} className="mb-3">
           <Card className="admin-stats-card card-hover h-100">
             <Card.Body className="text-center">
@@ -64,6 +65,7 @@ const Dashboard: React.FC = () => {
             </Card.Body>
           </Card>
         </Col>
+
         <Col xs={6} lg={3} className="mb-3">
           <Card className="admin-stats-card card-hover h-100">
             <Card.Body className="text-center">
@@ -75,6 +77,7 @@ const Dashboard: React.FC = () => {
             </Card.Body>
           </Card>
         </Col>
+
         <Col xs={6} lg={3} className="mb-3">
           <Card className="admin-stats-card card-hover h-100">
             <Card.Body className="text-center">
@@ -88,7 +91,7 @@ const Dashboard: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Recent Activities */}
+      {/* RECENT REGISTRATIONS */}
       <Row>
         <Col lg={6} className="mb-4">
           <Card className="card-hover">
@@ -101,55 +104,43 @@ const Dashboard: React.FC = () => {
                   <thead className="table-light">
                     <tr>
                       <th>Name</th>
-                      <th className="d-none d-md-table-cell">Email</th>
                       <th>Status</th>
                       <th className="d-none d-sm-table-cell">Date</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {dashboardData?.recent?.registrations?.map(
-                      (registration: any) => (
-                        <tr key={registration._id}>
-                          <td>
-                            <div>
-                              <div className="fw-medium">
-                                {registration.name}
-                              </div>
-                              <small className="text-muted d-md-none">
-                                {registration.email ||
-                                  registration.emergencyContact?.email}
+                    {dashboardData?.recent?.registrations?.length ? (
+                      dashboardData.recent.registrations.map(
+                        (registration: any) => (
+                          <tr key={registration._id}>
+                            <td className="fw-medium">{registration.name}</td>
+                            <td>
+                              <Badge
+                                bg={
+                                  registration.status === "approved"
+                                    ? "success"
+                                    : registration.status === "rejected"
+                                    ? "danger"
+                                    : "warning"
+                                }
+                              >
+                                {registration.status}
+                              </Badge>
+                            </td>
+                            <td className="d-none d-sm-table-cell">
+                              <small>
+                                {new Date(
+                                  registration.registeredAt ||
+                                    registration.createdAt
+                                ).toLocaleDateString()}
                               </small>
-                            </div>
-                          </td>
-                          <td className="d-none d-md-table-cell">
-                            {registration.email ||
-                              registration.emergencyContact?.email}
-                          </td>
-                          <td>
-                            <Badge
-                              bg={
-                                registration.status === "approved"
-                                  ? "success"
-                                  : registration.status === "rejected"
-                                  ? "danger"
-                                  : "warning"
-                              }
-                            >
-                              {registration.status}
-                            </Badge>
-                          </td>
-                          <td className="d-none d-sm-table-cell">
-                            <small>
-                              {new Date(
-                                registration.registeredAt
-                              ).toLocaleDateString()}
-                            </small>
-                          </td>
-                        </tr>
+                            </td>
+                          </tr>
+                        )
                       )
-                    ) || (
+                    ) : (
                       <tr>
-                        <td colSpan={4} className="text-center py-4">
+                        <td colSpan={3} className="text-center py-4">
                           No registrations found
                         </td>
                       </tr>
@@ -161,6 +152,7 @@ const Dashboard: React.FC = () => {
           </Card>
         </Col>
 
+        {/* RECENT DONATIONS */}
         <Col lg={6} className="mb-4">
           <Card className="card-hover">
             <Card.Header>
@@ -178,31 +170,26 @@ const Dashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {dashboardData?.recent?.payments?.map((payment: any) => (
-                      <tr key={payment._id}>
-                        <td>
-                          <div>
-                            <div className="fw-medium">{payment.donorName}</div>
-                            <small className="text-muted text-capitalize d-md-none">
-                              {payment.purpose.replace("-", " ")}
+                    {dashboardData?.recent?.payments?.length ? (
+                      dashboardData.recent.payments.map((payment: any) => (
+                        <tr key={payment._id}>
+                          <td className="fw-medium">{payment.donorName}</td>
+                          <td className="fw-bold text-success">
+                            ${payment.amount}
+                          </td>
+                          <td className="d-none d-md-table-cell text-capitalize">
+                            {payment.purpose.replace("-", " ")}
+                          </td>
+                          <td className="d-none d-sm-table-cell">
+                            <small>
+                              {new Date(
+                                payment.transactionDate
+                              ).toLocaleDateString()}
                             </small>
-                          </div>
-                        </td>
-                        <td className="fw-bold text-success">
-                          ${payment.amount}
-                        </td>
-                        <td className="d-none d-md-table-cell text-capitalize">
-                          {payment.purpose.replace("-", " ")}
-                        </td>
-                        <td className="d-none d-sm-table-cell">
-                          <small>
-                            {new Date(
-                              payment.transactionDate
-                            ).toLocaleDateString()}
-                          </small>
-                        </td>
-                      </tr>
-                    )) || (
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
                       <tr>
                         <td colSpan={4} className="text-center py-4">
                           No donations found
@@ -217,7 +204,7 @@ const Dashboard: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Registration Status Breakdown */}
+      {/* STATUS OVERVIEW */}
       <Row>
         <Col xs={12}>
           <Card className="card-hover">
@@ -226,37 +213,29 @@ const Dashboard: React.FC = () => {
             </Card.Header>
             <Card.Body>
               <Row className="text-center">
-                <Col xs={6} md={3} className="mb-3 mb-md-0">
-                  <div className="stat-item">
-                    <div className="stat-number text-success">
-                      {dashboardData?.registrations?.approved || 0}
-                    </div>
-                    <div className="stat-label">Approved</div>
+                <Col xs={6} md={3}>
+                  <div className="stat-number text-success">
+                    {dashboardData?.registrations?.approved || 0}
                   </div>
-                </Col>
-                <Col xs={6} md={3} className="mb-3 mb-md-0">
-                  <div className="stat-item">
-                    <div className="stat-number text-warning">
-                      {dashboardData?.registrations?.pending || 0}
-                    </div>
-                    <div className="stat-label">Pending</div>
-                  </div>
+                  <div>Approved</div>
                 </Col>
                 <Col xs={6} md={3}>
-                  <div className="stat-item">
-                    <div className="stat-number text-danger">
-                      {dashboardData?.registrations?.rejected || 0}
-                    </div>
-                    <div className="stat-label">Rejected</div>
+                  <div className="stat-number text-warning">
+                    {dashboardData?.registrations?.pending || 0}
                   </div>
+                  <div>Pending</div>
                 </Col>
                 <Col xs={6} md={3}>
-                  <div className="stat-item">
-                    <div className="stat-number text-primary">
-                      {dashboardData?.registrations?.total || 0}
-                    </div>
-                    <div className="stat-label">Total</div>
+                  <div className="stat-number text-danger">
+                    {dashboardData?.registrations?.rejected || 0}
                   </div>
+                  <div>Rejected</div>
+                </Col>
+                <Col xs={6} md={3}>
+                  <div className="stat-number text-primary">
+                    {dashboardData?.registrations?.total || 0}
+                  </div>
+                  <div>Total</div>
                 </Col>
               </Row>
             </Card.Body>
