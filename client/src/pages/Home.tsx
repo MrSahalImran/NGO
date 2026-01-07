@@ -190,9 +190,10 @@ const Home: React.FC = () => {
         <Container>
           <Row>
             <Col className="text-center mb-5">
-              <h2>Our Programs</h2>
+              <h2>Our Home & Facilities</h2>
               <p className="lead">
-                Making a difference through focused initiatives
+                A glimpse into the warm, caring environment where our residents
+                live and thrive.
               </p>
             </Col>
           </Row>
@@ -202,7 +203,7 @@ const Home: React.FC = () => {
               <PhotoGallery
                 images={[
                   {
-                    src: "/images/building1.jpg",
+                    src: "/images/home-page/building1.jpg",
                     caption: "Exterior - Main Building",
                   },
                   {

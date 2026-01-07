@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Row, Col, Card, Modal, Button } from "react-bootstrap";
-// no external types required
+import "../styles/photoGallery.css";
 
 type ImageItem = {
   src: string;
@@ -24,20 +24,22 @@ const PhotoGallery: React.FC<{ images: ImageItem[] }> = ({ images }) => {
         {images.map((img, i) => (
           <Col md={6} lg={4} key={i} className="mb-4">
             <Card
-              className="h-100 card-hover"
+              className="pg-card"
               onClick={() => open(img)}
               style={{ cursor: "pointer" }}
             >
-              <div style={{ height: 200, overflow: "hidden" }}>
-                <Card.Img
+              <div className="pg-img-wrapper">
+                <img
+                  className="pg-img"
                   src={img.src}
                   alt={img.alt || `photo-${i}`}
-                  style={{ objectFit: "cover", height: "100%" }}
+                  loading="lazy"
                 />
+                <div className="pg-caption">
+                  <div className="pg-title">{img.caption || img.alt}</div>
+                  <div className="pg-subtle">Click to enlarge</div>
+                </div>
               </div>
-              <Card.Body>
-                <Card.Title className="h6">{img.caption || img.alt}</Card.Title>
-              </Card.Body>
             </Card>
           </Col>
         ))}

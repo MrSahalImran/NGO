@@ -2,8 +2,6 @@ import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import {
   FaFacebook,
-  FaInstagram,
-  FaLinkedin,
   FaEnvelope,
   FaPhone,
   FaMapMarkerAlt,
@@ -17,18 +15,12 @@ const Footer: React.FC = () => {
           <Col md={4} className="mb-4">
             <h5>Vridh Ashram</h5>
             <p className="mb-3">
-              Empowering communities through education, healthcare, and
-              sustainable development initiatives.
+              Vridh Ashram is a non-profit organization dedicated to creating
+              positive change.
             </p>
             <div className="social-links">
               <a href="/" className="text-white me-3" aria-label="Facebook">
                 <FaFacebook size={24} />
-              </a>
-              <a href="/" className="text-white me-3" aria-label="Instagram">
-                <FaInstagram size={24} />
-              </a>
-              <a href="/" className="text-white" aria-label="LinkedIn">
-                <FaLinkedin size={24} />
               </a>
             </div>
           </Col>
