@@ -11,7 +11,7 @@ const uploadBufferToCloudinary = (buffer, filename) => {
       (error, result) => {
         if (error) return reject(error);
         resolve({ url: result.secure_url, public_id: result.public_id });
-      }
+      },
     );
 
     stream.end(buffer);
@@ -81,7 +81,7 @@ exports.submitDonation = async (req, res) => {
     if (!adminSend.ok) {
       console.warn(
         "Admin email failed:",
-        adminSend.error?.message || adminSend.error
+        adminSend.error?.message || adminSend.error,
       );
     }
 
@@ -105,7 +105,7 @@ exports.submitDonation = async (req, res) => {
     if (!donorSend.ok) {
       console.warn(
         "Donor confirmation failed:",
-        donorSend.error?.message || donorSend.error
+        donorSend.error?.message || donorSend.error,
       );
     }
 
@@ -189,48 +189,54 @@ exports.verifyDonation = async (req, res) => {
     donation.verifiedBy = req.user.id;
     donation.verifiedAt = new Date();
 
-    // Generate receipt number only if it doesn't exist
+    // Generate receipt number if not exists
     if (!donation.receiptNumber) {
       const year = new Date().getFullYear();
+
       const count = await Donation.countDocuments({
         receiptNumber: { $exists: true, $ne: null },
         createdAt: { $gte: new Date(year, 0, 1) },
       });
+
       donation.receiptNumber = `80G/${year}/${String(count + 1).padStart(
         4,
-        "0"
+        "0",
       )}`;
     }
 
     await donation.save();
 
-    // Generate 80G certificate PDF and upload to Cloudinary (preferred)
+    // Generate 80G Certificate PDF
     let pdfBuffer = null;
+
     try {
       pdfBuffer = await generate80G(donation, {
         name: process.env.ORG_NAME,
         address: process.env.ORG_ADDRESS,
         signatoryName: process.env.ORG_SIGNATORY,
       });
-      // Attempt upload to Cloudinary
+
+      // Upload to Cloudinary (for storage only)
       try {
         const filename = `80G_${donation._id}_${Date.now()}`;
+
         const uploadRes = await uploadBufferToCloudinary(pdfBuffer, filename);
+
         donation.certificateUrl = uploadRes.url;
         donation.certificateCloudinaryId = uploadRes.public_id;
         await donation.save();
-      } catch (upErr) {
-        console.error("Failed uploading certificate to Cloudinary:", upErr);
+      } catch (uploadErr) {
+        console.error("Cloudinary upload failed:", uploadErr);
       }
     } catch (pdfErr) {
       console.error("80G PDF generation failed:", pdfErr);
     }
 
-    // Build attachment list: prefer cloud URL (as path) else attach buffer
+    // 🔥 IMPORTANT FIX:
+    // Always attach buffer instead of Cloudinary URL
     const attachments = [];
-    if (donation.certificateUrl) {
-      attachments.push({ path: donation.certificateUrl });
-    } else if (pdfBuffer) {
+
+    if (pdfBuffer) {
       attachments.push({
         filename: `${donation.receiptNumber || "80G-Certificate"}.pdf`,
         content: pdfBuffer,
@@ -249,13 +255,15 @@ exports.verifyDonation = async (req, res) => {
         <p><strong>Donation Amount:</strong> ₹${donation.amount}</p>
         <p><strong>Transaction ID:</strong> ${donation.transactionId}</p>
         <p><strong>Date:</strong> ${new Date(
-          donation.verifiedAt
+          donation.verifiedAt,
         ).toLocaleDateString()}</p>
         <br>
         <p>This donation is eligible for tax deduction under Section 80G of the Income Tax Act, 1961.</p>
-        <p>Your certificate is attached to this email. You can also download it from: ${
-          donation.certificateUrl || "(attached)"
-        }</p>
+        ${
+          donation.certificateUrl
+            ? `<p>You can also download it here: <a href="${donation.certificateUrl}">Download Certificate</a></p>`
+            : ""
+        }
         <br>
         <p>Thank you for supporting our cause!</p>
         <p>Best regards,<br>Vridh Ashram Team</p>
@@ -264,17 +272,14 @@ exports.verifyDonation = async (req, res) => {
     };
 
     const certSend = await sendMailSafe(mailOptions);
+
     if (certSend.ok) {
       donation.status = "certificate_sent";
-      // clear any previous mail failure log on success
       donation.mailFailures = [];
       await donation.save();
     } else {
-      console.error(
-        "Certificate email failed:",
-        certSend.error?.message || certSend.error
-      );
-      // record mail failure for admin visibility
+      console.error("Certificate email failed:", certSend.error);
+
       donation.mailFailures = donation.mailFailures || [];
       donation.mailFailures.push({
         when: new Date(),
@@ -283,17 +288,20 @@ exports.verifyDonation = async (req, res) => {
           certSend.error ||
           "unknown",
       });
+
       await donation.save();
-      // keep status as verified so admin can retry sending later
     }
 
-    res.json({
-      message: "Donation verified and certificate sent successfully",
+    return res.json({
+      message: certSend.ok
+        ? "Donation verified and certificate sent successfully"
+        : "Donation verified but email sending failed",
       donation,
     });
   } catch (error) {
     console.error("Verify donation error:", error);
-    res.status(500).json({
+
+    return res.status(500).json({
       message: "Failed to verify donation",
       error: error.message,
     });
@@ -344,7 +352,7 @@ exports.rejectDonation = async (req, res) => {
     if (!rejSend.ok) {
       console.warn(
         "Rejection email failed:",
-        rejSend.error?.message || rejSend.error
+        rejSend.error?.message || rejSend.error,
       );
     }
 
@@ -367,49 +375,97 @@ exports.resendCertificate = async (req, res) => {
     const donation = await Donation.findById(req.params.id);
 
     if (!donation) {
+      console.warn("Resend failed: Donation not found:", req.params.id);
       return res.status(404).json({ message: "Donation not found" });
     }
 
     if (donation.status === "pending") {
+      console.warn(
+        `Resend blocked: Donation ${donation._id} still pending verification`,
+      );
       return res
         .status(400)
         .json({ message: "Donation is still pending verification" });
     }
 
-    // Prefer existing cloud-hosted certificate if present
-    let attachments = [];
-    if (donation.certificateUrl) {
-      attachments.push({ path: donation.certificateUrl });
-    } else {
-      // generate and upload
+    let pdfBuffer = null;
+
+    // 1️⃣ Try fetching existing certificate safely
+    if (donation.certificateCloudinaryId) {
       try {
-        const pdfBuffer = await generate80G(donation, {
+        const cloudinary = require("cloudinary").v2;
+        const axios = require("axios");
+
+        const result = await cloudinary.api.resource(
+          donation.certificateCloudinaryId,
+          { resource_type: "raw" },
+        );
+
+        const response = await axios.get(result.secure_url, {
+          responseType: "arraybuffer",
+        });
+
+        pdfBuffer = Buffer.from(response.data);
+
+        console.log(
+          `Existing certificate fetched from Cloudinary for donation ${donation._id}`,
+        );
+      } catch (err) {
+        console.error(
+          `Failed fetching Cloudinary certificate for donation ${donation._id}:`,
+          err.message,
+        );
+      }
+    }
+
+    // 2️⃣ If no buffer → regenerate
+    if (!pdfBuffer) {
+      try {
+        pdfBuffer = await generate80G(donation, {
           name: process.env.ORG_NAME,
           address: process.env.ORG_ADDRESS,
           signatoryName: process.env.ORG_SIGNATORY,
         });
+
+        console.log(`New certificate generated for donation ${donation._id}`);
+
+        // upload for storage
         try {
           const filename = `80G_${donation._id}_${Date.now()}`;
           const uploadRes = await uploadBufferToCloudinary(pdfBuffer, filename);
+
           donation.certificateUrl = uploadRes.url;
           donation.certificateCloudinaryId = uploadRes.public_id;
           await donation.save();
-          attachments.push({ path: donation.certificateUrl });
-        } catch (upErr) {
-          // fallback to attaching buffer
-          console.error(
-            "Failed uploading certificate to Cloudinary (resend):",
-            upErr
+
+          console.log(
+            `Certificate uploaded to Cloudinary for donation ${donation._id}`,
           );
-          attachments.push({
-            filename: `${donation.receiptNumber || "80G-Certificate"}.pdf`,
-            content: pdfBuffer,
-          });
+        } catch (uploadErr) {
+          console.error(
+            `Cloudinary upload failed for donation ${donation._id}:`,
+            uploadErr.message,
+          );
         }
       } catch (pdfErr) {
-        console.error("80G PDF generation failed (resend):", pdfErr);
+        console.error(
+          `80G PDF generation failed for donation ${donation._id}:`,
+          pdfErr.message,
+        );
+
+        return res.status(500).json({
+          message: "Failed to generate certificate",
+        });
       }
     }
+
+    // 3️⃣ Always attach buffer (NO URL PATH)
+    const attachments = [
+      {
+        filename: `${donation.receiptNumber || "80G-Certificate"}.pdf`,
+        content: pdfBuffer,
+      },
+    ];
 
     const mailOptions = {
       to: donation.email,
@@ -427,28 +483,45 @@ exports.resendCertificate = async (req, res) => {
     };
 
     const send = await sendMailSafe(mailOptions);
+
     if (send.ok) {
+      console.log(
+        `✅ Certificate email resent successfully to ${donation.email} | Receipt: ${donation.receiptNumber}`,
+      );
+
       donation.status = "certificate_sent";
       donation.mailFailures = [];
       await donation.save();
-      return res.json({ message: "Certificate resent successfully", donation });
+
+      return res.json({
+        message: "Certificate resent successfully",
+        donation,
+      });
     }
 
+    // ❌ Email failed
     console.error(
-      "Resend certificate failed:",
-      send.error?.message || send.error
+      `❌ Certificate resend failed for ${donation.email} | Receipt: ${donation.receiptNumber}`,
     );
+    console.error("Error details:", send.error);
+
     donation.mailFailures = donation.mailFailures || [];
     donation.mailFailures.push({
       when: new Date(),
       error: (send.error && send.error.message) || send.error || "unknown",
     });
+
     await donation.save();
-    return res.status(500).json({ message: "Failed to resend certificate" });
+
+    return res.status(500).json({
+      message: "Failed to resend certificate",
+    });
   } catch (error) {
-    console.error("Resend certificate error:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to resend certificate", error: error.message });
+    console.error("Resend certificate controller crashed:", error);
+
+    return res.status(500).json({
+      message: "Failed to resend certificate",
+      error: error.message,
+    });
   }
 };
