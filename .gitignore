@@ -44,3 +44,4 @@ seedAdmin.js
 
 # Uploads folder (not needed with Cloudinary)
 uploads/
+.claude
