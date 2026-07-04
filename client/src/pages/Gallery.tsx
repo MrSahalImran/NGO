@@ -64,7 +64,7 @@ const Gallery: React.FC = () => {
             Photo Gallery
           </h2>
           <p className="text-muted small mb-0">
-            Moments from our NGO activities and events
+            Moments from life at our home
           </p>
         </div>
       </div>
@@ -100,7 +100,7 @@ const Gallery: React.FC = () => {
                       <i className="bi bi-building"></i>
                     </div>
                     <div className="user-info">
-                      <div className="username">Virdh Ashram</div>
+                      <div className="username">Vridh Ashram</div>
                     </div>
                   </div>
                 </div>
@@ -113,7 +113,7 @@ const Gallery: React.FC = () => {
                 {/* Post Content */}
                 <div className="post-content">
                   <div className="post-title">
-                    <strong>Virdh Ashram</strong> {photo.title}
+                    <strong>Vridh Ashram</strong> {photo.title}
                   </div>
                   {photo.description && (
                     <p className="post-description">{photo.description}</p>
@@ -136,7 +136,7 @@ const Gallery: React.FC = () => {
         {`
           /* Main Feed Container */
           .instagram-feed {
-            background-color: #fafafa;
+            background-color: #F5EEE2;
             min-height: 100vh;
             padding-bottom: 2rem;
           }
@@ -144,9 +144,9 @@ const Gallery: React.FC = () => {
           /* Feed Header */
           .feed-header {
             background: white;
-            border-bottom: 1px solid #dbdbdb;
+            border-bottom: 1px solid #E7DDCD;
             position: sticky;
-            top: 56px;
+            top: 74px;
             z-index: 100;
             padding: 0 1rem;
             transition: transform 0.3s ease, opacity 0.3s ease;
@@ -176,7 +176,7 @@ const Gallery: React.FC = () => {
           /* Post Card */
           .post-card {
             background: white;
-            border: 1px solid #dbdbdb;
+            border: 1px solid #E7DDCD;
             border-radius: 8px;
             margin-bottom: 0;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -188,7 +188,7 @@ const Gallery: React.FC = () => {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid #efefef;
+            border-bottom: 1px solid #F0E8DA;
           }
 
           .post-user {
@@ -201,7 +201,7 @@ const Gallery: React.FC = () => {
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            background: linear-gradient(135deg, #F4C56A 0%, #E6A02C 55%, #BC7A1C 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -212,7 +212,7 @@ const Gallery: React.FC = () => {
 
           .user-avatar i {
             background: white;
-            color: #262626;
+            color: #26212E;
             border-radius: 50%;
             width: 38px;
             height: 38px;
@@ -229,7 +229,7 @@ const Gallery: React.FC = () => {
           .username {
             font-weight: 600;
             font-size: 14px;
-            color: #262626;
+            color: #26212E;
           }
 
           .post-location {
@@ -242,7 +242,7 @@ const Gallery: React.FC = () => {
             width: 100%;
             max-height: 600px;
             overflow: hidden;
-            background: #000;
+            background: #1B1729;
             position: relative;
           }
 
@@ -257,12 +257,12 @@ const Gallery: React.FC = () => {
           /* Post Content */
           .post-content {
             padding: 16px;
-            border-top: 1px solid #efefef;
+            border-top: 1px solid #F0E8DA;
           }
 
           .post-title {
             font-size: 14px;
-            color: #262626;
+            color: #26212E;
             margin-bottom: 8px;
             line-height: 1.5;
           }
@@ -273,7 +273,7 @@ const Gallery: React.FC = () => {
 
           .post-description {
             font-size: 14px;
-            color: #262626;
+            color: #26212E;
             margin: 8px 0;
             line-height: 1.5;
           }
@@ -298,7 +298,7 @@ const Gallery: React.FC = () => {
 
           .post-date {
             font-size: 10px;
-            color: #8e8e8e;
+            color: #8A8294;
             text-transform: uppercase;
             margin-top: 8px;
             letter-spacing: 0.2px;
@@ -308,7 +308,7 @@ const Gallery: React.FC = () => {
           .empty-state {
             text-align: center;
             padding: 5rem 2rem;
-            color: #8e8e8e;
+            color: #8A8294;
           }
 
           .empty-state i {
@@ -328,7 +328,7 @@ const Gallery: React.FC = () => {
             }
 
             .feed-header {
-              top: 56px;
+              top: 74px;
               padding: 0 0.75rem;
             }
 
@@ -353,7 +353,7 @@ const Gallery: React.FC = () => {
 
             .post-card {
               border-radius: 12px;
-              border: 1px solid #dbdbdb;
+              border: 1px solid #E7DDCD;
               margin-bottom: 0;
               box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             }

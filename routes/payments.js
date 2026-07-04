@@ -1,6 +1,7 @@
 const express = require("express");
 const { body } = require("express-validator");
 const router = express.Router();
+const adminAuth = require("../middleware/admin");
 const {
   createPaymentIntent,
   confirmPayment,
@@ -32,13 +33,14 @@ router.post(
   confirmPayment
 );
 
-// Get all payments (for admin)
-router.get("/", getPayments);
+// Get all payments (admin only)
+router.get("/", adminAuth, getPayments);
 
-// Get payment by ID
-router.get("/:id", getPaymentById);
+// Get payment statistics (admin only) — declared before "/:id" so "stats"
+// isn't captured as an id param
+router.get("/stats/summary", adminAuth, getStatsSummary);
 
-// Get payment statistics
-router.get("/stats/summary", getStatsSummary);
+// Get payment by ID (admin only)
+router.get("/:id", adminAuth, getPaymentById);
 
 module.exports = router;

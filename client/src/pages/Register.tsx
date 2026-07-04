@@ -45,7 +45,7 @@ const Register = () => {
       const result = await register(userData);
 
       if (result.success) {
-        toast.success("Registration successful! Welcome to Hope Foundation.");
+        toast.success("Registration successful! Welcome to Vridh Ashram.");
         navigate("/");
       } else {
         toast.error(result.message);

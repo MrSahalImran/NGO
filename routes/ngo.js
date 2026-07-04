@@ -8,38 +8,33 @@ router.get("/info", (req, res) => {
     mission:
       "Our mission goes beyond providing basic necessities—it is about restoring self-worth, spreading kindness, and upholding the belief that every elder deserves to live with respect and compassion. Guided by the spirit of humanity, we strive to serve each resident with unconditional love, ensuring that they feel valued, cherished, and never alone.",
     vision:
-      "A world where every individual has access to basic necessities and opportunities for growth.",
+      "A society where no elder is abandoned — where old age is met with dignity, companionship, and belonging.",
     founded: "2010",
     description:
-      "Vridh Ashram is a non-profit organization dedicated to creating positive change in underserved communities.",
+      "A home in Ambphalla, Jammu for elders who have no one — where the last years of life are met with care, not neglect.",
     programs: [
       {
         id: 1,
-        title: "Education for All",
+        title: "Meals & Nutrition",
         description:
-          "Providing quality education and resources to children in rural areas.",
-        image: "/images/education.jpg",
+          "Three warm, home-cooked meals a day, planned for ageing bodies.",
       },
       {
         id: 2,
-        title: "Healthcare Access",
+        title: "Medical Care",
         description:
-          "Mobile health clinics and medical camps in remote locations.",
-        image: "/images/healthcare.jpg",
+          "Daily medicines, regular check-ups, and help in emergencies.",
       },
       {
         id: 3,
-        title: "Environmental Conservation",
-        description:
-          "Tree plantation drives and environmental awareness programs.",
-        image: "/images/environment.jpg",
+        title: "Shelter & Comfort",
+        description: "A clean bed, a safe room, and a place to belong.",
       },
       {
         id: 4,
-        title: "Poverty Alleviation",
+        title: "Companionship",
         description:
-          "Skill development and microfinance programs for economic empowerment.",
-        image: "/images/poverty.jpg",
+          "Someone to sit with, talk to, and share the day — no one is left alone.",
       },
     ],
     impact: {
@@ -65,68 +60,16 @@ router.get("/info", (req, res) => {
   res.json(ngoInfo);
 });
 
-// Get testimonials
+// Testimonials — served from a datastore/CMS once real quotes are collected.
+// Returns an empty list rather than fabricated placeholder content.
 router.get("/testimonials", (req, res) => {
-  const testimonials = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      role: "Volunteer",
-      message:
-        "Working with Hope Foundation has been incredibly rewarding. The impact we make together is truly inspiring.",
-      image: "/images/testimonial1.jpg",
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      role: "Beneficiary Parent",
-      message:
-        "Thanks to Hope Foundation, my daughter now has access to quality education. Our family's future looks brighter.",
-      image: "/images/testimonial2.jpg",
-    },
-    {
-      id: 3,
-      name: "Dr. Emily Rodriguez",
-      role: "Medical Volunteer",
-      message:
-        "The healthcare programs reach people who need it most. It's amazing to see the difference we can make.",
-      image: "/images/testimonial3.jpg",
-    },
-  ];
-
-  res.json(testimonials);
+  res.json([]);
 });
 
-// Get latest news/updates
+// News/updates — served from a datastore/CMS once real posts exist.
+// Returns an empty list rather than fabricated placeholder content.
 router.get("/news", (req, res) => {
-  const news = [
-    {
-      id: 1,
-      title: "New School Opens in Rural Community",
-      summary:
-        "Hope Foundation inaugurates its 50th school in a remote village, bringing education closer to 200 children.",
-      date: "2024-01-15",
-      image: "/images/news1.jpg",
-    },
-    {
-      id: 2,
-      title: "Medical Camp Serves 500 Patients",
-      summary:
-        "Free medical camp conducted in partnership with local hospitals provides healthcare to underserved population.",
-      date: "2024-01-10",
-      image: "/images/news2.jpg",
-    },
-    {
-      id: 3,
-      title: "Environmental Awareness Drive",
-      summary:
-        "Community tree plantation program plants 1000 trees and educates locals about environmental conservation.",
-      date: "2024-01-05",
-      image: "/images/news3.jpg",
-    },
-  ];
-
-  res.json(news);
+  res.json([]);
 });
 
 module.exports = router;

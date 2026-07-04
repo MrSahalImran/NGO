@@ -2,7 +2,9 @@ const express = require("express");
 const { body, validationResult } = require("express-validator");
 const Registration = require("../models/Registration");
 const { sendMailSafe } = require("../utils/mailer");
+const { escapeHtml } = require("../utils/escapeHtml");
 const logger = require("../utils/logger");
+const adminAuth = require("../middleware/admin");
 
 const router = express.Router();
 
@@ -48,7 +50,31 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const registration = new Registration(req.body);
+      // Whitelist fields explicitly — never let the client set `status`
+      // (or any other field) by spreading the raw request body.
+      const {
+        name,
+        email,
+        phone,
+        address,
+        dateOfBirth,
+        gender,
+        occupation,
+        interests,
+        emergencyContact,
+      } = req.body;
+
+      const registration = new Registration({
+        name,
+        email,
+        phone,
+        address,
+        dateOfBirth,
+        gender,
+        occupation,
+        interests,
+        emergencyContact,
+      });
       await registration.save();
 
       logger.log("[registrations] New registration created:", registration._id);
@@ -75,7 +101,7 @@ router.post(
 /**
  * GET ALL REGISTRATIONS (ADMIN)
  */
-router.get("/", async (req, res) => {
+router.get("/", adminAuth, async (req, res) => {
   try {
     const registrations = await Registration.find().sort({ registeredAt: -1 });
     res.json(registrations);
@@ -86,9 +112,9 @@ router.get("/", async (req, res) => {
 });
 
 /**
- * GET REGISTRATION BY ID
+ * GET REGISTRATION BY ID (ADMIN)
  */
-router.get("/:id", async (req, res) => {
+router.get("/:id", adminAuth, async (req, res) => {
   try {
     const registration = await Registration.findById(req.params.id);
     if (!registration)
@@ -101,9 +127,9 @@ router.get("/:id", async (req, res) => {
 });
 
 /**
- * UPDATE REGISTRATION STATUS
+ * UPDATE REGISTRATION STATUS (ADMIN)
  */
-router.patch("/:id/status", async (req, res) => {
+router.patch("/:id/status", adminAuth, async (req, res) => {
   try {
     logger.log(`[registrations] PATCH status called`, req.params.id, req.body);
 
@@ -136,9 +162,9 @@ router.patch("/:id/status", async (req, res) => {
           const text = `Dear ${
             registration.name || "Applicant"
           },\n\nWe are pleased to inform you that your resident admission request has been approved.\n\nOur admissions team will contact you with next steps and further instructions.\n\nRegards,\nVirdh Ashram`;
-          const html = `<p>Dear ${
+          const html = `<p>Dear ${escapeHtml(
             registration.name || "Applicant"
-          },</p><p><strong>We are pleased to inform you</strong> that your resident admission request has been <strong>approved</strong>.</p><p>Our admissions team will contact you with next steps and further instructions.</p><p>Regards,<br/>Virdh Ashram</p>`;
+          )},</p><p><strong>We are pleased to inform you</strong> that your resident admission request has been <strong>approved</strong>.</p><p>Our admissions team will contact you with next steps and further instructions.</p><p>Regards,<br/>Virdh Ashram</p>`;
 
           const mailOptions = { to: toEmail, subject, text, html };
           const mailResult = await sendMailSafe(mailOptions);

@@ -1,6 +1,8 @@
 const Donation = require("../models/Donation");
 const { cloudinary } = require("../config/cloudinary");
 const { sendMailSafe } = require("../utils/mailer");
+const { escapeHtml } = require("../utils/escapeHtml");
+const { nextReceiptNumber } = require("../utils/receiptNumber");
 const generate80G = require("../utils/generate80g");
 
 // Upload a Buffer to Cloudinary and return { url, public_id }
@@ -61,12 +63,12 @@ exports.submitDonation = async (req, res) => {
       subject: `New Donation Received - ₹${amount}`,
       html: `
         <h2>New Donation Submission</h2>
-        <p><strong>Donor Name:</strong> ${donorName}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone || "N/A"}</p>
-        <p><strong>Amount:</strong> ₹${amount}</p>
-        <p><strong>Transaction ID:</strong> ${transactionId}</p>
-        <p><strong>Message:</strong> ${message || "N/A"}</p>
+        <p><strong>Donor Name:</strong> ${escapeHtml(donorName)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Phone:</strong> ${escapeHtml(phone || "N/A")}</p>
+        <p><strong>Amount:</strong> ₹${escapeHtml(amount)}</p>
+        <p><strong>Transaction ID:</strong> ${escapeHtml(transactionId)}</p>
+        <p><strong>Message:</strong> ${escapeHtml(message || "N/A")}</p>
         <p><strong>Payment Proof:</strong> <a href="${
           req.file.path
         }">View Proof</a></p>
@@ -91,7 +93,7 @@ exports.submitDonation = async (req, res) => {
       subject: "80G Certificate Request Received - Vridh Ashram",
       html: `
         <h2>Thank You for Your Donation!</h2>
-        <p>Dear ${donorName},</p>
+        <p>Dear ${escapeHtml(donorName)},</p>
         <p>We have received your request for 80G certificate.</p>
         <p>Your donation will be confirmed by our team. Your 80G certificate will be generated and emailed to you after confirmation.</p>
         <br>
@@ -189,19 +191,10 @@ exports.verifyDonation = async (req, res) => {
     donation.verifiedBy = req.user.id;
     donation.verifiedAt = new Date();
 
-    // Generate receipt number if not exists
+    // Generate receipt number if not exists (atomic — no race on the
+    // unique index under concurrent verifications)
     if (!donation.receiptNumber) {
-      const year = new Date().getFullYear();
-
-      const count = await Donation.countDocuments({
-        receiptNumber: { $exists: true, $ne: null },
-        createdAt: { $gte: new Date(year, 0, 1) },
-      });
-
-      donation.receiptNumber = `80G/${year}/${String(count + 1).padStart(
-        4,
-        "0",
-      )}`;
+      donation.receiptNumber = await nextReceiptNumber();
     }
 
     await donation.save();
@@ -248,12 +241,16 @@ exports.verifyDonation = async (req, res) => {
       subject: "80G Tax Exemption Certificate - Vridh Ashram",
       html: `
         <h2>80G Tax Exemption Certificate</h2>
-        <p>Dear ${donation.donorName},</p>
+        <p>Dear ${escapeHtml(donation.donorName)},</p>
         <p>Thank you for your generous donation to Vridh Ashram.</p>
         <br>
-        <p><strong>Receipt Number:</strong> ${donation.receiptNumber}</p>
-        <p><strong>Donation Amount:</strong> ₹${donation.amount}</p>
-        <p><strong>Transaction ID:</strong> ${donation.transactionId}</p>
+        <p><strong>Receipt Number:</strong> ${escapeHtml(
+          donation.receiptNumber,
+        )}</p>
+        <p><strong>Donation Amount:</strong> ₹${escapeHtml(donation.amount)}</p>
+        <p><strong>Transaction ID:</strong> ${escapeHtml(
+          donation.transactionId,
+        )}</p>
         <p><strong>Date:</strong> ${new Date(
           donation.verifiedAt,
         ).toLocaleDateString()}</p>
@@ -337,12 +334,12 @@ exports.rejectDonation = async (req, res) => {
       subject: "Donation Verification Update - Vridh Ashram",
       html: `
         <h2>Donation Verification Update</h2>
-        <p>Dear ${donation.donorName},</p>
+        <p>Dear ${escapeHtml(donation.donorName)},</p>
         <p>We regret to inform you that we could not verify your donation submission.</p>
-        <p><strong>Reason:</strong> ${donation.rejectionReason}</p>
+        <p><strong>Reason:</strong> ${escapeHtml(donation.rejectionReason)}</p>
         <br>
         <p>If you believe this is an error, please contact us with your transaction details.</p>
-        <p>Transaction ID: ${donation.transactionId}</p>
+        <p>Transaction ID: ${escapeHtml(donation.transactionId)}</p>
         <br>
         <p>Best regards,<br>Vridh Ashram Team</p>
       `,
@@ -394,18 +391,20 @@ exports.resendCertificate = async (req, res) => {
     if (donation.certificateCloudinaryId) {
       try {
         const cloudinary = require("cloudinary").v2;
-        const axios = require("axios");
 
         const result = await cloudinary.api.resource(
           donation.certificateCloudinaryId,
           { resource_type: "raw" },
         );
 
-        const response = await axios.get(result.secure_url, {
-          responseType: "arraybuffer",
-        });
-
-        pdfBuffer = Buffer.from(response.data);
+        const response = await fetch(result.secure_url);
+        if (!response.ok) {
+          throw new Error(
+            `Failed to download certificate: HTTP ${response.status}`,
+          );
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        pdfBuffer = Buffer.from(arrayBuffer);
 
         console.log(
           `Existing certificate fetched from Cloudinary for donation ${donation._id}`,
@@ -472,10 +471,12 @@ exports.resendCertificate = async (req, res) => {
       subject: "80G Tax Exemption Certificate - Vridh Ashram",
       html: `
         <h2>80G Tax Exemption Certificate</h2>
-        <p>Dear ${donation.donorName},</p>
+        <p>Dear ${escapeHtml(donation.donorName)},</p>
         <p>Please find attached your 80G certificate for donation.</p>
-        <p><strong>Receipt Number:</strong> ${donation.receiptNumber}</p>
-        <p><strong>Donation Amount:</strong> ₹${donation.amount}</p>
+        <p><strong>Receipt Number:</strong> ${escapeHtml(
+          donation.receiptNumber,
+        )}</p>
+        <p><strong>Donation Amount:</strong> ₹${escapeHtml(donation.amount)}</p>
         <br>
         <p>Best regards,<br>Vridh Ashram Team</p>
       `,

@@ -79,6 +79,26 @@ exports.uploadMultiplePhotos = async (req, res) => {
       });
   } catch (error) {
     console.error("Multiple upload error:", error);
+
+    // Clean up so a partial failure doesn't leave orphaned Cloudinary files
+    // or half-saved Photo documents behind.
+    if (req.files && req.files.length) {
+      await Promise.all(
+        req.files.map(async (file) => {
+          try {
+            await Photo.deleteOne({ cloudinaryId: file.filename });
+            await cloudinary.uploader.destroy(file.filename);
+          } catch (cleanupErr) {
+            console.error(
+              "Cleanup error for",
+              file.filename,
+              cleanupErr.message
+            );
+          }
+        })
+      );
+    }
+
     res
       .status(500)
       .json({ message: "Server error during upload", error: error.message });

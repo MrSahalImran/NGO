@@ -12,11 +12,28 @@ const app = express();
 
 // Middleware
 app.use(helmet());
+
+// CORS: restrict to an allow-list in production, reflect any origin in dev.
+// Configure via CORS_ORIGINS (comma-separated) or CLIENT_URL.
+const allowedOrigins = (process.env.CORS_ORIGINS || process.env.CLIENT_URL || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: true, // Allow all origins in development
+    origin: (origin, callback) => {
+      // Allow non-browser clients (curl, server-to-server) with no Origin
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      // No allow-list configured → permissive in dev only, closed in prod
+      if (allowedOrigins.length === 0 && process.env.NODE_ENV !== "production") {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "x-auth-token", "Authorization"],
   })
 );
@@ -71,14 +88,45 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Serve static assets in production
+// Unmatched API routes → JSON 404 (never fall through to the SPA handler)
+app.use("/api", (req, res) => {
+  res.status(404).json({ message: "API endpoint not found" });
+});
+
+// Serve static assets in production (Vite builds to client/dist)
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "client/build")));
+  app.use(express.static(path.join(__dirname, "client/dist")));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "client/build", "index.html"));
+    res.sendFile(path.join(__dirname, "client/dist", "index.html"));
   });
 }
+
+// Global error handler — return clean JSON instead of leaking HTML stack
+// traces. Handles Multer upload failures and file-type rejections.
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+
+  // Multer errors (file too large, too many files, unexpected field, etc.)
+  if (err && err.name === "MulterError") {
+    const message =
+      err.code === "LIMIT_FILE_SIZE"
+        ? "File too large. Maximum size is 5MB."
+        : `Upload error: ${err.message}`;
+    return res.status(400).json({ message });
+  }
+
+  // File-type rejection raised by the Cloudinary storage fileFilter
+  if (err && err.code === "INVALID_FILE_TYPE") {
+    return res.status(400).json({ message: err.message });
+  }
+
+  console.error("Unhandled error:", err);
+  const payload = { message: "Server error" };
+  if (process.env.NODE_ENV === "development") payload.error = err.message;
+  res.status(500).json(payload);
+});
 
 const PORT = process.env.PORT || 5000;
 

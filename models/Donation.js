@@ -70,16 +70,7 @@ const donationSchema = new mongoose.Schema(
   }
 );
 
-// Generate receipt number before saving
-donationSchema.pre("save", async function (next) {
-  if (this.isNew && this.status === "verified" && !this.receiptNumber) {
-    const year = new Date().getFullYear();
-    const count = await mongoose.model("Donation").countDocuments({
-      createdAt: { $gte: new Date(year, 0, 1) },
-    });
-    this.receiptNumber = `80G/${year}/${String(count + 1).padStart(4, "0")}`;
-  }
-  next();
-});
+// Receipt numbers are assigned atomically at verification time via
+// utils/receiptNumber.js — see donationsController.verifyDonation.
 
 module.exports = mongoose.model("Donation", donationSchema);

@@ -1,4 +1,5 @@
 const { sendMailSafe } = require("../utils/mailer");
+const { escapeHtml } = require("../utils/escapeHtml");
 
 // POST /api/contact
 exports.sendContactEmail = async (req, res) => {
@@ -17,11 +18,11 @@ exports.sendContactEmail = async (req, res) => {
       subject: `Website Contact Form: ${subject}`,
       html: `
         <h2>New message from Contact Form</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
         <p><strong>Message:</strong></p>
-        <div style="white-space:pre-wrap;">${message}</div>
+        <div style="white-space:pre-wrap;">${escapeHtml(message)}</div>
         <br/>
         <p>--</p>
         <p>This message was sent from the website contact form.</p>
@@ -44,7 +45,7 @@ exports.sendContactEmail = async (req, res) => {
         await sendMailSafe({
           to: email,
           subject: "We received your message",
-          html: `<p>Hi ${name},</p><p>Thanks for contacting us. We'll get back to you shortly.</p><p>— Vridh Ashram</p>`,
+          html: `<p>Hi ${escapeHtml(name)},</p><p>Thanks for contacting us. We'll get back to you shortly.</p><p>— Vridh Ashram</p>`,
         });
       } catch (e) {
         // swallow errors

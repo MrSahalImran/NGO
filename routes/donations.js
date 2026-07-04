@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../middleware/auth");
+const adminAuth = require("../middleware/admin");
 const { upload } = require("../config/cloudinary");
 const {
   submitDonation,
@@ -8,15 +8,8 @@ const {
   getDonationById,
   verifyDonation,
   rejectDonation,
+  resendCertificate,
 } = require("../controllers/donationsController");
-
-// Middleware to check if user is admin
-const isAdmin = (req, res, next) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ message: "Access denied. Admin only." });
-  }
-  next();
-};
 
 // @route   POST /api/donations/submit
 // @desc    Submit donation details with payment proof
@@ -26,27 +19,26 @@ router.post("/submit", upload.single("paymentProof"), submitDonation);
 // @route   GET /api/donations
 // @desc    Get all donations (Admin only)
 // @access  Private (Admin)
-router.get("/", auth, isAdmin, getDonations);
+router.get("/", adminAuth, getDonations);
 
 // @route   GET /api/donations/:id
 // @desc    Get single donation (Admin only)
 // @access  Private (Admin)
-router.get("/:id", auth, isAdmin, getDonationById);
+router.get("/:id", adminAuth, getDonationById);
 
 // @route   PUT /api/donations/:id/verify
 // @desc    Verify and approve donation, generate certificate
 // @access  Private (Admin)
-router.put("/:id/verify", auth, isAdmin, verifyDonation);
+router.put("/:id/verify", adminAuth, verifyDonation);
 
 // @route   PUT /api/donations/:id/reject
 // @desc    Reject donation
 // @access  Private (Admin)
-router.put("/:id/reject", auth, isAdmin, rejectDonation);
+router.put("/:id/reject", adminAuth, rejectDonation);
 
 // @route   PUT /api/donations/:id/resend-certificate
 // @desc    Resend 80G certificate to donor (Admin only)
 // @access  Private (Admin)
-const { resendCertificate } = require("../controllers/donationsController");
-router.put("/:id/resend-certificate", auth, isAdmin, resendCertificate);
+router.put("/:id/resend-certificate", adminAuth, resendCertificate);
 
 module.exports = router;

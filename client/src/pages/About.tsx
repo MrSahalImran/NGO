@@ -9,10 +9,10 @@ const About: React.FC = () => {
     mission:
       "Our mission goes beyond providing basic necessities—it is about restoring self-worth, spreading kindness, and upholding the belief that every elder deserves to live with respect and compassion. Guided by the spirit of humanity, we strive to serve each resident with unconditional love, ensuring that they feel valued, cherished, and never alone.",
     vision:
-      "A world where every individual has access to basic necessities and opportunities for growth.",
+      "A society where no elder is abandoned — where old age is met with dignity, companionship, and belonging.",
     founded: "2010",
     description:
-      "Vridh Ashram is a non-profit organization dedicated to creating positive change in underserved communities.",
+      "A home in Ambphalla, Jammu for elders who have no one — where the last years of life are met with care, not neglect.",
     programs: [],
     impact: {
       beneficiaries: 10000,

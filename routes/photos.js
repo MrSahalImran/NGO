@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../middleware/auth");
+const adminAuth = require("../middleware/admin");
 const { upload } = require("../config/cloudinary");
 const {
   uploadPhoto,
@@ -10,28 +10,19 @@ const {
   deletePhoto,
 } = require("../controllers/photosController");
 
-// Middleware to check if user is admin
-const isAdmin = (req, res, next) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ message: "Access denied. Admin only." });
-  }
-  next();
-};
-
 // ADMIN ENDPOINTS - Upload & Manage Photos
 
 // @route   POST /api/photos/upload
 // @desc    Upload a single photo (Admin only)
 // @access  Private (Admin)
-router.post("/upload", auth, isAdmin, upload.single("photo"), uploadPhoto);
+router.post("/upload", adminAuth, upload.single("photo"), uploadPhoto);
 
 // @route   POST /api/photos/upload-multiple
 // @desc    Upload multiple photos (Admin only)
 // @access  Private (Admin)
 router.post(
   "/upload-multiple",
-  auth,
-  isAdmin,
+  adminAuth,
   upload.array("photos", 10),
   uploadMultiplePhotos
 );
@@ -46,11 +37,11 @@ router.get("/", getPhotos);
 // @route   PUT /api/photos/:id
 // @desc    Update photo details (Admin only)
 // @access  Private (Admin)
-router.put("/:id", auth, isAdmin, updatePhoto);
+router.put("/:id", adminAuth, updatePhoto);
 
 // @route   DELETE /api/photos/:id
 // @desc    Delete a photo (Admin only)
 // @access  Private (Admin)
-router.delete("/:id", auth, isAdmin, deletePhoto);
+router.delete("/:id", adminAuth, deletePhoto);
 
 module.exports = router;

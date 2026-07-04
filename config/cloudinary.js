@@ -60,7 +60,9 @@ const fileFilter = (req, file, cb) => {
     const msg = isPaymentProof
       ? "Only image or PDF files are allowed for payment proof"
       : "Only image files are allowed (JPEG, PNG, GIF, WEBP)";
-    cb(new Error(msg), false);
+    const err = new Error(msg);
+    err.code = "INVALID_FILE_TYPE";
+    cb(err, false);
   }
 };
 

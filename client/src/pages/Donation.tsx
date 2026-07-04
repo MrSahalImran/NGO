@@ -113,9 +113,8 @@ const Donation: React.FC = () => {
             <Col lg={8} className="mx-auto text-center">
               <h1>Make a Donation</h1>
               <p className="lead">
-                Your contribution helps us continue our mission of creating
-                positive change in communities. Please use the details below to
-                donate via bank transfer or UPI.
+                Every rupee becomes a meal, a medicine, a warm bed for an elder
+                who has no one else. Give below by bank transfer or UPI.
               </p>
             </Col>
           </Row>

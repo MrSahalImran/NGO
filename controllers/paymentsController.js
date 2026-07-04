@@ -33,8 +33,55 @@ exports.confirmPayment = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const paymentData = req.body;
-    const payment = new Payment({ ...paymentData, status: "completed" });
+    // Whitelist descriptive fields from the client. The authoritative
+    // amount/currency/status come from Stripe, never from the request body.
+    const {
+      donorName,
+      donorEmail,
+      donorPhone,
+      donationType,
+      purpose,
+      message,
+      isAnonymous,
+      stripePaymentId,
+    } = req.body;
+
+    // Verify the payment actually succeeded with Stripe before recording it.
+    let intent;
+    try {
+      intent = await stripe.paymentIntents.retrieve(stripePaymentId);
+    } catch (stripeErr) {
+      console.error("Stripe retrieve failed:", stripeErr.message);
+      return res.status(400).json({ message: "Unknown or invalid payment" });
+    }
+
+    if (!intent || intent.status !== "succeeded") {
+      return res
+        .status(400)
+        .json({ message: "Payment has not been completed" });
+    }
+
+    // Idempotency: never record the same Stripe payment twice.
+    const existing = await Payment.findOne({ stripePaymentId });
+    if (existing) {
+      return res
+        .status(200)
+        .json({ message: "Payment already recorded", payment: existing });
+    }
+
+    const payment = new Payment({
+      donorName,
+      donorEmail,
+      donorPhone,
+      donationType,
+      purpose,
+      message,
+      isAnonymous,
+      stripePaymentId,
+      amount: intent.amount / 100, // Stripe amount is in the smallest unit
+      currency: intent.currency,
+      status: "completed",
+    });
 
     await payment.save();
     res.status(201).json({ message: "Payment recorded successfully", payment });
