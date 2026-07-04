@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
+const fs = require("fs");
 const helmet = require("helmet");
 
 // Load environment variables
@@ -93,12 +94,20 @@ app.use("/api", (req, res) => {
   res.status(404).json({ message: "API endpoint not found" });
 });
 
-// Serve static assets in production (Vite builds to client/dist)
-if (process.env.NODE_ENV === "production") {
+// Serve the built frontend only if it's actually present (i.e. this deploy
+// also built the client). When the backend runs API-only — frontend hosted
+// separately, e.g. on Vercel — skip it and expose a small status at "/".
+const clientIndex = path.join(__dirname, "client/dist", "index.html");
+if (process.env.NODE_ENV === "production" && fs.existsSync(clientIndex)) {
   app.use(express.static(path.join(__dirname, "client/dist")));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "client/dist", "index.html"));
+  app.get("*", (req, res) => res.sendFile(clientIndex));
+} else {
+  app.get("/", (req, res) => {
+    res.json({
+      status: "ok",
+      service: "Vridh Ashram API",
+      health: "/api/health",
+    });
   });
 }
 
